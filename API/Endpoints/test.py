@@ -11,4 +11,4 @@ class Test(BaseEndpoint):
     @staticmethod
     @route.get("/test", response_class=HTMLResponse)
     async def test(request: Request, id: int = 5):
-        return Test.template_response("index.html", request=request, id=id)
+        return Test.template_response("test.html", request=request, id=id)
