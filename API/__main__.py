@@ -33,8 +33,8 @@ def main():
     # Finished setup, run it
     loop = asyncio.get_event_loop()
 
-    Application = BaseApplication()
-    loop.run_until_complete(asyncio.wait([loop.create_task(Application.serve())]))
+    application = BaseApplication()
+    loop.run_until_complete(asyncio.wait([loop.create_task(application.serve())]))
 
     # To define more asynchronous applications to be ran that can be done via
     # loop.create_task(YOUR_APPLICATION) pior to loop.run_until_complete
