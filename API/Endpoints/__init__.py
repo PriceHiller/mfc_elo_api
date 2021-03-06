@@ -2,12 +2,11 @@ import importlib
 import pkgutil
 
 import fastapi
+from fastapi import Request
 
 from API import BaseApplication
 
 TemplateResponse = BaseApplication.templates.TemplateResponse
-
-from fastapi import Request
 
 
 class BaseEndpoint:
