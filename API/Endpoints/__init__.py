@@ -40,12 +40,8 @@ class BaseEndpoint:
                 raise AttributeError(f"\"{subclass.__name__}\" does not have an attribute \"route\"")
 
     @staticmethod
-    def template_response(filename: str, request: Request, **template_data):
+    def html_response(filename: str, request: Request, **template_data):
         return TemplateResponse(filename, {"request": request, **template_data})
-
-    @staticmethod
-    def static_response(filename: str, request: Request):
-        return TemplateResponse(filename, {"request": request})
 
     @classmethod
     def json_response(cls, message: str = None, data: dict = None, *extra_info, **kwargs):
