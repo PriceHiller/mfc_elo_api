@@ -4,13 +4,13 @@ import pathlib
 
 from API.Endpoints import BaseEndpoint
 from API import BaseApplication
-from API import base_dir
+from API import root_path
 
 
 def setup_logging():
     log_format = "[%(asctime)s][%(threadName)s][%(name)s.%(funcName)s:%(lineno)d][%(levelname)s] %(message)s"
 
-    file_handler = logging.FileHandler(str(pathlib.Path(base_dir)) + "/api.log")
+    file_handler = logging.FileHandler(str(pathlib.Path(root_path)) + "/api.log")
     file_handler.setLevel(logging.DEBUG)
     file_handler.setFormatter(logging.Formatter(log_format))
 

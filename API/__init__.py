@@ -14,15 +14,15 @@ from API.Server import UvicornConfiguration
 
 log = logging.getLogger(__name__)
 
-base_dir = Path(__file__).parent
+root_path = Path(__file__).parent
 
 
 class BaseApplication:
     app = fastapi.FastAPI()
 
-    app.mount("/Static", StaticFiles(directory=str(base_dir) + "/Static"), name="Static")
+    app.mount("/Static", StaticFiles(directory=str(root_path) + "/Static"), name="Static")
 
-    templates = Jinja2Templates(directory=str(base_dir) + "/Templates")
+    templates = Jinja2Templates(directory=str(root_path) + "/Templates")
 
     def __init__(self, config: UvicornConfiguration = UvicornConfiguration(app=app)):
         self.config = config
