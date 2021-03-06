@@ -9,6 +9,7 @@ TemplateResponse = BaseApplication.templates.TemplateResponse
 
 from fastapi import Request
 
+
 class BaseEndpoint:
 
     @staticmethod
