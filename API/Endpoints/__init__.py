@@ -12,7 +12,7 @@ TemplateResponse = BaseApplication.templates.TemplateResponse
 class BaseEndpoint:
 
     @staticmethod
-    def find_subclasses(package: str = "API.Endpoints", recursive: bool = True):
+    def find_subclasses(package: str = "API.Endpoints", recursive: bool = True) -> None:
         """ Import all submodules of a module, recursively, including subpackages
 
         Credit to: https://stackoverflow.com/a/25562415/13079078, Mr. B on stackoverflow
@@ -29,7 +29,7 @@ class BaseEndpoint:
                 BaseEndpoint.find_subclasses(full_name, recursive)
 
     @staticmethod
-    def load_endpoints():
+    def load_endpoints() -> None:
         for subclass in BaseEndpoint.__subclasses__():
             if hasattr(subclass, "route"):
                 router: fastapi.APIRouter = getattr(subclass, "route")
@@ -40,7 +40,7 @@ class BaseEndpoint:
                 raise AttributeError(f"\"{subclass.__name__}\" does not have an attribute \"route\"")
 
     @staticmethod
-    def html_response(filename: str, request: Request, **template_data):
+    def html_response(filename: str, request: Request, **template_data) -> TemplateResponse:
         return TemplateResponse(filename, {"request": request, **template_data})
 
 

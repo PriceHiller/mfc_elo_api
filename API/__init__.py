@@ -30,7 +30,7 @@ class BaseApplication:
 
     @staticmethod
     @app.on_event("startup")
-    async def startup():
+    async def startup() -> None:
         for route in BaseApplication.app.routes:
             if isinstance(route, Route):
                 log.info(f"Registered route: \"{route.path}\", methods: {route.methods}")
@@ -39,7 +39,7 @@ class BaseApplication:
         return UvicornServer(config=self.config).serve(sockets=sockets)
 
     @staticmethod
-    def _setup_logging():
+    def _setup_logging() -> None:
         log_format = "[%(asctime)s][%(threadName)s][%(name)s.%(funcName)s:%(lineno)d][%(levelname)s] %(message)s"
 
         file_handler = logging.FileHandler(str(root_path) + "/api.log")
@@ -54,7 +54,7 @@ class BaseApplication:
         logging.getLogger().addHandler(file_handler)
 
     @classmethod
-    def run(cls, *args, **kwargs):
+    def run(cls, *args, **kwargs) -> None:
 
         from API.Endpoints import BaseEndpoint
 
