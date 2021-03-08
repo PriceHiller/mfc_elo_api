@@ -1,4 +1,5 @@
 import logging
+import asyncio
 
 import fastapi
 
@@ -36,6 +37,44 @@ class BaseApplication:
 
     def serve(self, sockets=None):
         return UvicornServer(config=self.config).serve(sockets=sockets)
+
+    @staticmethod
+    def _setup_logging():
+        log_format = "[%(asctime)s][%(threadName)s][%(name)s.%(funcName)s:%(lineno)d][%(levelname)s] %(message)s"
+
+        file_handler = logging.FileHandler(str(root_path) + "/api.log")
+        file_handler.setLevel(logging.DEBUG)
+        file_handler.setFormatter(logging.Formatter(log_format))
+
+        logging.basicConfig(
+            level=logging.DEBUG,
+            format=log_format,
+        )
+
+        logging.getLogger().addHandler(file_handler)
+
+    @classmethod
+    def run(cls, *args, **kwargs):
+
+        from API.Endpoints import BaseEndpoint
+
+        # Logging Configuration
+        cls._setup_logging()
+
+        # FastAPI setup
+        BaseEndpoint.find_subclasses()
+        BaseEndpoint.load_endpoints()
+        # Finished setup, run it
+        loop = asyncio.get_event_loop()
+
+        loop.run_until_complete(asyncio.wait([loop.create_task(cls().serve(sockets=kwargs.get("sockets")))]))
+
+        # To define more asynchronous applications to be ran that can be done via
+        # loop.create_task(YOUR_APPLICATION) pior to loop.run_until_complete
+
+
+
+
 
 
 __all__ = [
