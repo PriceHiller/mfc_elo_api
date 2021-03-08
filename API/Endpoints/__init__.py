@@ -43,29 +43,7 @@ class BaseEndpoint:
     def html_response(filename: str, request: Request, **template_data):
         return TemplateResponse(filename, {"request": request, **template_data})
 
-    @classmethod
-    def json_response(cls, message: str = None, data: dict = None, *extra_info, **kwargs):
-        name = cls.__name__
-        return BaseResponse(name=name, message=message, data=data, *extra_info, **kwargs).response
-
-
-class BaseResponse:
-
-    def __init__(self,
-                 name: str,
-                 message: str = None,
-                 data: dict = None,
-                 *extra_info,
-                 **kwargs):
-        self.response = {
-            "name": name,
-            "message": message,
-            "data": data,
-            **kwargs,
-            "extra": [info for info in extra_info]}
-
 
 __all__ = [
     "BaseEndpoint",
-    "BaseResponse"
 ]

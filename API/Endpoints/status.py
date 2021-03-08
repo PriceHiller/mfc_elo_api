@@ -12,4 +12,4 @@ class Status(BaseEndpoint):
     @staticmethod
     @route.get("/status")
     async def _status():
-        return Status.json_response()
+        return {"Status": Status.status}
