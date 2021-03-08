@@ -73,10 +73,6 @@ class BaseApplication:
         # loop.create_task(YOUR_APPLICATION) pior to loop.run_until_complete
 
 
-
-
-
-
 __all__ = [
     "BaseApplication",
 ]
