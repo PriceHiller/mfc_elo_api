@@ -1,13 +1,10 @@
 from fastapi import APIRouter
 from fastapi.responses import UJSONResponse
 
-
 from API.Endpoints import BaseEndpoint
 
 
-
 class Status(BaseEndpoint):
-
     status = "Online"
 
     route = APIRouter()
