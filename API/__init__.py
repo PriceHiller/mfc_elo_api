@@ -25,7 +25,7 @@ class BaseApplication:
 
     templates = Jinja2Templates(directory=str(root_path) + "/Templates")
 
-    def __init__(self, config: UvicornConfiguration = UvicornConfiguration(app=app)):
+    def __init__(self, config: UvicornConfiguration = UvicornConfiguration(app=app, reload=True)):
         self.config = config
 
     @staticmethod

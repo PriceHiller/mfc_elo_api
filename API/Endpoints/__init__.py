@@ -1,4 +1,5 @@
 import importlib
+import logging
 import pkgutil
 
 import fastapi
@@ -7,6 +8,8 @@ from fastapi import Request
 from API import BaseApplication
 
 TemplateResponse = BaseApplication.templates.TemplateResponse
+
+log = logging.getLogger(__name__)
 
 
 class BaseEndpoint:
@@ -31,13 +34,24 @@ class BaseEndpoint:
     @staticmethod
     def load_endpoints() -> None:
         for subclass in BaseEndpoint.__subclasses__():
-            if hasattr(subclass, "route"):
+            base_subcls_msg = f"The class: \"{subclass.__name__}\" ({subclass.__module__})"
+            try:
                 router: fastapi.APIRouter = getattr(subclass, "route")
                 if not isinstance(router, fastapi.APIRouter):
-                    raise TypeError(f"\"{subclass.__name__}\" \"route\" attribute is not an \"APIRouter\"")
+                    raise TypeError(f"{base_subcls_msg} \"route\" attribute is not a \"fastapi.APIRouter\"")
                 BaseApplication.app.include_router(router)
-            else:
-                raise AttributeError(f"\"{subclass.__name__}\" does not have an attribute \"route\"")
+            except AttributeError:
+                raise AttributeError(f"{base_subcls_msg} does not have an attribute \"route\"")
+            
+            
+            try:
+                tag = getattr(subclass, "tags")
+                if len(tag) <= 0:
+                    log.warning(f"{base_subcls_msg} tags attribute lacks tag data")
+                if not isinstance(tag, list):
+                    log.warning(f"{base_subcls_msg} is not of type \"list\"")
+            except AttributeError:
+                log.warning(f"{base_subcls_msg} lacks a tags list attribute!")
 
     @staticmethod
     def html_response(filename: str, request: Request, **template_data) -> TemplateResponse:

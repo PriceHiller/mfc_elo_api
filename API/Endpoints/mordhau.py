@@ -5,7 +5,7 @@ from API.Schemas.Mordhau.player import Player as MordhauPlayer
 
 
 class Mordhau(BaseEndpoint):
-    route = APIRouter()
+    route = APIRouter(prefix="/mordhau")
 
     @staticmethod
     @route.post("/player/")
