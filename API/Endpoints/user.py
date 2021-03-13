@@ -8,7 +8,7 @@ from API.Endpoints import CommonTags
 
 from API.Schemas.user import User as UserSchema
 
-from API.auth.jwt import JWTBearer
+from API.auth import JWTBearer
 from API.auth import check_authentication
 from API.auth import users
 from API.auth import get_password_hash
