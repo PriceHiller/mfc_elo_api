@@ -74,5 +74,5 @@ class BaseApplication:
 
 
 __all__ = [
-    "BaseApplication",
+    "BaseApplication"
 ]
