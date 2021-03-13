@@ -4,7 +4,9 @@ from fastapi.exceptions import HTTPException
 from API.Endpoints import BaseEndpoint
 
 from API.Schemas.blog.post import Post
-from API.auth.auth_bearer import JWTBearer
+from API.Schemas.user import User
+
+from API.auth import check_authentication
 
 posts = [
     {
@@ -41,8 +43,8 @@ class Posts(BaseEndpoint):
         return error
 
     @staticmethod
-    @route.post("/posts", tags=tags, dependencies=[Depends(JWTBearer())])
-    async def add_post(post: Post) -> dict:
+    @route.post("/posts", tags=tags)
+    async def add_post(post: Post, user: User = Depends(check_authentication)) -> dict:
         post.id = len(posts) + 1
         posts.append(post.dict())
         return {

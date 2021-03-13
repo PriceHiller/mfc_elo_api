@@ -12,6 +12,13 @@ TemplateResponse = BaseApplication.templates.TemplateResponse
 log = logging.getLogger(__name__)
 
 
+class CommonTags:
+    jwt = "jwt"
+    cookie = "cookie"
+    session = "session"
+    auth_required = "authentication required"
+
+
 class BaseEndpoint:
 
     @staticmethod
@@ -42,8 +49,7 @@ class BaseEndpoint:
                 BaseApplication.app.include_router(router)
             except AttributeError:
                 raise AttributeError(f"{base_subcls_msg} does not have an attribute \"route\"")
-            
-            
+
             try:
                 tag = getattr(subclass, "tags")
                 if len(tag) <= 0:

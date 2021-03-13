@@ -8,7 +8,7 @@ from pydantic import EmailStr
 class User(BaseModel):
     username: str = Field(min_length=3,
                           max_length=36)
-    email: EmailStr = Field(...)
+    email: Optional[EmailStr] = None
     password: str = Field(min_length=8,
                           regex="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$")
 
@@ -20,7 +20,3 @@ class User(BaseModel):
                 "password": "SomeSecurePassword@321"
             }
         }
-
-
-class UserLogin(User):
-    pass
