@@ -1,20 +1,57 @@
-from fastapi.security import OAuth2PasswordBearer
+from fastapi import Depends
+from fastapi import HTTPException
 
-from jose import JWTError, jwt
-from passlib.context import CryptContext
+from bcrypt import hashpw
+from bcrypt import gensalt
+from bcrypt import checkpw
+from fastapi.security import APIKeyCookie
 
-SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRES_MINUTES = 30
+from API.auth import jwt
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+JWTBearer = jwt.JWTBearer
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+users = []
 
-
-def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
+SESSION_COOKIE = APIKeyCookie(name="session")
 
 
-def get_password_hash(password):
-    return pwd_context.hash(password)
+def _handle_token(token: str):
+    payload = JWTBearer.decode_jwt(token)
+    for existing_user in users:
+        if existing_user.email == payload.get("user_id"):
+            return existing_user
+    return None
+
+
+def _jwt_token(token: str = Depends(JWTBearer())):
+    return _handle_token(token)
+
+
+async def check_authentication(token: str = Depends(_jwt_token)):
+    if token:
+        return token
+    raise HTTPException(
+        status_code=403
+    )
+
+
+def verify_password(plain_password: [str, bytes], hashed_password: [str, bytes]):
+    if not isinstance(plain_password, bytes):
+        plain_password = plain_password.encode("utf8")
+    if not isinstance(hashed_password, bytes):
+        hashed_password = hashed_password.encode("utf8")
+    return checkpw(plain_password, hashed_password)
+
+
+def get_password_hash(password: [str, bytes]):
+    if not isinstance(password, bytes):
+        password = password.encode("utf8")
+    return hashpw(password, gensalt())
+
+
+__all__ = [
+    "JWTBearer",
+    "check_authentication",
+    "verify_password",
+    "get_password_hash"
+]

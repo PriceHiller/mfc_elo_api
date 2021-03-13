@@ -1,5 +1,6 @@
 import logging
 import asyncio
+import uvloop
 
 import fastapi
 
@@ -25,7 +26,7 @@ class BaseApplication:
 
     templates = Jinja2Templates(directory=str(root_path) + "/Templates")
 
-    def __init__(self, config: UvicornConfiguration = UvicornConfiguration(app=app)):
+    def __init__(self, config: UvicornConfiguration = UvicornConfiguration(app=app, reload=True)):
         self.config = config
 
     @staticmethod
@@ -65,7 +66,10 @@ class BaseApplication:
         BaseEndpoint.find_subclasses()
         BaseEndpoint.load_endpoints()
         # Finished setup, run it
-        loop = asyncio.get_event_loop()
+        uvloop.install()
+        asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+
+        loop = asyncio.new_event_loop()
 
         loop.run_until_complete(asyncio.wait([loop.create_task(cls().serve(sockets=kwargs.get("sockets")))]))
 
