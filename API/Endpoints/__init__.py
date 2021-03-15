@@ -6,6 +6,7 @@ import fastapi
 from fastapi import Request
 
 from API import BaseApplication
+from API import find_subclasses
 
 TemplateResponse = BaseApplication.templates.TemplateResponse
 
@@ -21,25 +22,11 @@ class CommonTags:
 
 class BaseEndpoint:
 
-    @staticmethod
-    def find_subclasses(package: str = "API.Endpoints", recursive: bool = True) -> None:
-        """ Import all submodules of a module, recursively, including subpackages
 
-        Credit to: https://stackoverflow.com/a/25562415/13079078, Mr. B on stackoverflow
-        :param recursive: bool
-        :param package: package (name or actual module)
-        :type package: str | module
-        """
-        if isinstance(package, str):
-            package = importlib.import_module(package)
-        for loader, name, is_pkg in pkgutil.walk_packages(package.__path__):
-            full_name = package.__name__ + '.' + name
-            importlib.import_module(full_name)
-            if recursive and is_pkg:
-                BaseEndpoint.find_subclasses(full_name, recursive)
 
     @staticmethod
     def load_endpoints() -> None:
+        find_subclasses("API.Endpoints")
         for subclass in BaseEndpoint.__subclasses__():
             base_subcls_msg = f"The class: \"{subclass.__name__}\" ({subclass.__module__})"
             try:

@@ -5,10 +5,16 @@ from pydantic import Field
 from pydantic import EmailStr
 
 
-class User(BaseModel):
+class BaseUser(BaseModel):
     username: str = Field(min_length=3,
                           max_length=36)
     email: Optional[EmailStr] = None
+
+    class Config:
+        orm_mode = True
+
+
+class UserPW(BaseUser):
     password: str = Field(min_length=8,
                           regex="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$")
 
@@ -20,3 +26,8 @@ class User(BaseModel):
                 "password": "SomeSecurePassword@321"
             }
         }
+
+
+class User(BaseUser):
+    id: int
+    is_active: bool

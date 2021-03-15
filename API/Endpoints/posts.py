@@ -6,7 +6,7 @@ from API.Endpoints import BaseEndpoint
 from API.Schemas.blog.post import Post
 from API.Schemas.user import User
 
-from API.auth import check_authentication
+from API.auth import JWTBearer
 
 posts = [
     {
@@ -44,7 +44,7 @@ class Posts(BaseEndpoint):
 
     @staticmethod
     @route.post("/posts", tags=tags)
-    async def add_post(post: Post, user: User = Depends(check_authentication)) -> dict:
+    async def add_post(post: Post, user: User = Depends(JWTBearer())) -> dict:
         post.id = len(posts) + 1
         posts.append(post.dict())
         return {

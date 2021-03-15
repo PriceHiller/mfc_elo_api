@@ -1,6 +1,9 @@
-import logging
 import asyncio
 import uvloop
+import logging
+
+import importlib
+import pkgutil
 
 import fastapi
 
@@ -8,6 +11,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from starlette.routing import Route
+from starlette.middleware.authentication import AuthenticationMiddleware
 
 from pathlib import Path
 
@@ -20,8 +24,12 @@ root_path = Path(__file__).parent
 
 
 class BaseApplication:
+
     app = fastapi.FastAPI()
 
+    #app.add_middleware(
+    #     AuthenticationMiddleware
+    # )
     app.mount("/Static", StaticFiles(directory=str(root_path) + "/Static"), name="Static")
 
     templates = Jinja2Templates(directory=str(root_path) + "/Templates")
@@ -63,7 +71,6 @@ class BaseApplication:
         cls._setup_logging()
 
         # FastAPI setup
-        BaseEndpoint.find_subclasses()
         BaseEndpoint.load_endpoints()
         # Finished setup, run it
         uvloop.install()
@@ -75,6 +82,23 @@ class BaseApplication:
 
         # To define more asynchronous applications to be ran that can be done via
         # loop.create_task(YOUR_APPLICATION) pior to loop.run_until_complete
+
+
+def find_subclasses(package: str = "API", recursive: bool = True) -> None:
+    """ Import all submodules of a module, recursively, including subpackages
+
+    Credit to: https://stackoverflow.com/a/25562415/13079078, Mr. B on stackoverflow
+    :param recursive: bool
+    :param package: package (name or actual module)
+    :type package: str | module
+    """
+    if isinstance(package, str):
+        package = importlib.import_module(package)
+    for loader, name, is_pkg in pkgutil.walk_packages(package.__path__):
+        full_name = package.__name__ + '.' + name
+        importlib.import_module(full_name)
+        if recursive and is_pkg:
+            find_subclasses(full_name, recursive)
 
 
 __all__ = [
