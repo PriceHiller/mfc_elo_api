@@ -22,4 +22,3 @@ class ModelBase:
         find_subclasses(__package__)
         for subclass in ModelBase.__subclasses__():
             log.info(f"Loaded model: \"{subclass.__name__}\"")
-            print(subclass.metadata)
