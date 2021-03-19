@@ -43,7 +43,7 @@ class BaseApplication:
 
         await BaseDB.db.connect()
 
-        await BaseDB.create_tables()
+        BaseDB.create_tables()
 
     @staticmethod
     @app.on_event("shutdown")

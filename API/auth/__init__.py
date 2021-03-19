@@ -22,7 +22,7 @@ def verify_password(plain_password: [str, bytes], hashed_password: [str, bytes])
 def get_password_hash(password: [str, bytes]) -> str:
     if not isinstance(password, bytes):
         password = password.encode("utf8")
-    return str(hashpw(password, gensalt()))
+    return hashpw(password, gensalt()).decode("utf8")
 
 
 __all__ = [

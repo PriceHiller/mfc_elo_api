@@ -16,7 +16,7 @@ class BaseUser(BaseModel):
 
 class UserPW(BaseUser):
     password: str = Field(min_length=8,
-                          regex="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$")
+                          regex=R"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$")
 
     class Config:
         schema_extra = {

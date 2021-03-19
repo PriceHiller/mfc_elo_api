@@ -1,3 +1,5 @@
+import sqlalchemy
+
 from decouple import config
 from databases import Database
 
@@ -10,5 +12,6 @@ class BaseDB:
     db = Database(SQLALCHEMY_DATABASE_URL)
 
     @classmethod
-    async def create_tables(cls):
-        await cls.db.execute(metadata.create_all())
+    def create_tables(cls):
+        engine = sqlalchemy.create_engine(cls.SQLALCHEMY_DATABASE_URL)
+        metadata.create_all(engine)
