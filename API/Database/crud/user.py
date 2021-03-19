@@ -39,3 +39,5 @@ async def get_user_by_username(username: str) -> [ModelUser, None]:
             detail="Invalid Credentials",
             headers={"WWW-Authenticate": "Basic"},
         )
+
+#async def get_user_by_id(id: int)

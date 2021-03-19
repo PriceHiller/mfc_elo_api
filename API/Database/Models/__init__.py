@@ -1,8 +1,11 @@
 import logging
 import sqlalchemy
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy import MetaData
 from sqlalchemy.ext.declarative import as_declarative
 from sqlalchemy.orm import declarative_base
+
+from uuid import uuid4
 
 from API import find_subclasses
 
@@ -15,7 +18,7 @@ log = logging.getLogger(__name__)
 
 @as_declarative()
 class ModelBase:
-    primary_key = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, index=True)
+    primary_key = sqlalchemy.Column(UUID(as_uuid=True), primary_key=True, index=True, default=uuid4)
 
     @staticmethod
     def load_models():
