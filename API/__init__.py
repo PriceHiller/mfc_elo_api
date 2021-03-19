@@ -43,6 +43,8 @@ class BaseApplication:
 
         await BaseDB.db.connect()
 
+        await BaseDB.create_tables()
+
     @staticmethod
     @app.on_event("shutdown")
     async def shutdown() -> None:
@@ -93,8 +95,6 @@ class BaseApplication:
 
         # To define more asynchronous applications to be ran that can be done via
         # loop.create_task(YOUR_APPLICATION) pior to loop.run_until_complete
-        loop.create_task(BaseDB.create_tables())
-        loop.run_until_complete(BaseDB.db.connect())
 
 
 def find_subclasses(package: str = "API", recursive: bool = True) -> None:
