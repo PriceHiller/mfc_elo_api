@@ -13,3 +13,5 @@ venv/
 .Remote
 
 .Test
+
+*.sqlite*
