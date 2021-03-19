@@ -22,7 +22,7 @@ class ModelBase:
     primary_key = sqlalchemy.Column(
         UUID(as_uuid=True),
         primary_key=True,
-        server_default=uuid.uuid4,
+        default=uuid.uuid4,
     )
 
     @staticmethod
