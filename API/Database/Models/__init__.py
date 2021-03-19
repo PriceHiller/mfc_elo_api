@@ -21,4 +21,4 @@ class ModelBase:
     def load_models():
         find_subclasses(__package__)
         for subclass in ModelBase.__subclasses__():
-            log.info(f"Loaded model: \"{subclass.__name__}\"")
+            log.info(f"Loaded model: \"{subclass.__name__}\" ({subclass.__module__})")
