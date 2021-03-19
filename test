@@ -1,0 +1,15 @@
+wheel
+
+uvloop
+fastapi
+aiofiles
+uvicorn
+jinja2
+sqlalchemy
+python-decouple
+databases[postgresql]
+asyncpg
+pydantic[email]
+bcrypt
+python-jose
+psycopg2-binary

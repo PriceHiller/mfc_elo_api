@@ -14,6 +14,12 @@ class User(ModelBase, AlcBase):
     email = sqlalchemy.Column(sqlalchemy.String, unique=True, index=True)
     is_active = sqlalchemy.Column(sqlalchemy.Boolean, default=True)
 
+Meta = User.metadata
+
+__all__ = [
+    "User",
+    "Meta"
+]
 
 # __table__ = \
 #         sqlalchemy.Table(
