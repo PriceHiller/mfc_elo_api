@@ -14,11 +14,12 @@ db = BaseDB.db
 
 
 async def create_user(user: SchemaUser) -> dict:
+    print(ModelUser().primary_key)
     query = ModelUser.__table__.insert().values(
         username=user.username,
         hashed_password=get_password_hash(user.password),
         email=user.email
-    )
+    ).commit()
     print(query)
     try:
         return await db.execute(query)  # This will return the user ID

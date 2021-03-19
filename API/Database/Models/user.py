@@ -4,8 +4,8 @@ from . import ModelBase
 from . import AlcBase
 
 
-class User(ModelBase, AlcBase):
-    __table__: sqlalchemy.Table
+class User(ModelBase):
+
 
     __tablename__ = "users"
 
