@@ -5,7 +5,7 @@ from . import AlcBase
 
 
 class User(ModelBase, AlcBase):
-    __table__: sqlalchemy.Table
+
 
     __tablename__ = "users"
 
