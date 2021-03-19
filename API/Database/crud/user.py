@@ -19,8 +19,9 @@ async def create_user(user: SchemaUser) -> dict:
         hashed_password=get_password_hash(user.password),
         email=user.email
     )
-    print(query)
+
     try:
+        print(query)
         return await db.execute(query)  # This will return the user ID
     except UniqueViolationError:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="User already exists")

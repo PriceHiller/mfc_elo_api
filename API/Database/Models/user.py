@@ -4,7 +4,7 @@ from . import ModelBase
 from . import AlcBase
 
 
-class User(ModelBase):
+class User(ModelBase, AlcBase):
 
 
     __tablename__ = "users"

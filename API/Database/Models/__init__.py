@@ -5,7 +5,6 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy import MetaData
 from sqlalchemy.ext.declarative import as_declarative
 from sqlalchemy.orm import declarative_base
-
 from API import find_subclasses
 
 AlcBase = declarative_base()
@@ -18,12 +17,7 @@ log = logging.getLogger(__name__)
 @as_declarative()
 class ModelBase:
     __table__: sqlalchemy.Table
-
-    primary_key = sqlalchemy.Column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4,
-    )
+    id = sqlalchemy.Column(UUID, server_default=sqlalchemy.text("uuid_generate_v4()"), primary_key=True)
 
     @staticmethod
     def load_models():
