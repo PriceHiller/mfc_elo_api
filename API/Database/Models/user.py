@@ -13,11 +13,3 @@ class User(ModelBase, AlcBase):
     hashed_password = sqlalchemy.Column(sqlalchemy.String)
     email = sqlalchemy.Column(sqlalchemy.String, unique=True, index=True)
     is_active = sqlalchemy.Column(sqlalchemy.Boolean, default=True)
-
-
-Meta = User.metadata
-
-__all__ = [
-    "User",
-    "Meta"
-]
