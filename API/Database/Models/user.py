@@ -21,14 +21,3 @@ __all__ = [
     "User",
     "Meta"
 ]
-
-# __table__ = \
-#         sqlalchemy.Table(
-#             "users",
-#             metadata,
-#             sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True),
-#             sqlalchemy.Column("username", sqlalchemy.String, unique=True),
-#             sqlalchemy.Column("hashed_password", sqlalchemy.String),
-#             sqlalchemy.Column("email", sqlalchemy.Integer, unique=True, index=True),
-#             sqlalchemy.Column("is_active", sqlalchemy.Boolean, default=True)
-#
