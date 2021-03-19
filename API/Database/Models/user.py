@@ -1,16 +1,27 @@
-from sqlalchemy import Column
-from sqlalchemy import Integer
-from sqlalchemy import String
-from sqlalchemy import Boolean
+import sqlalchemy
 
-from API.Database import Base
+from . import ModelBase
+from . import AlcBase
 
 
-class User(Base):
+class User(ModelBase, AlcBase):
+    __table__: sqlalchemy.Table
+
     __tablename__ = "users"
 
-    id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True, index=True)
-    hashed_password = Column(String)
-    email = Column(String, unique=True, index=True)
-    is_active = Column(Boolean, default=True)
+    username = sqlalchemy.Column(sqlalchemy.String, unique=True, index=True)
+    hashed_password = sqlalchemy.Column(sqlalchemy.String)
+    email = sqlalchemy.Column(sqlalchemy.String, unique=True, index=True)
+    is_active = sqlalchemy.Column(sqlalchemy.Boolean, default=True)
+
+
+# __table__ = \
+#         sqlalchemy.Table(
+#             "users",
+#             metadata,
+#             sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True),
+#             sqlalchemy.Column("username", sqlalchemy.String, unique=True),
+#             sqlalchemy.Column("hashed_password", sqlalchemy.String),
+#             sqlalchemy.Column("email", sqlalchemy.Integer, unique=True, index=True),
+#             sqlalchemy.Column("is_active", sqlalchemy.Boolean, default=True)
+#

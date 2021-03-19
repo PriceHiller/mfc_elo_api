@@ -1,34 +1,14 @@
-import sqlalchemy
-from sqlalchemy.orm import create_session
-from sqlalchemy.ext.declarative import declarative_base
 from decouple import config
+from databases import Database
 
-from API import find_subclasses
-
-SQLALCHEMY_DATABASE_URL = config("sql_db_url")
-
-engine = None
+from API.Database.Models import metadata
 
 
-if "sqlite" in str(SQLALCHEMY_DATABASE_URL).lower():
-    engine = sqlalchemy.create_engine(
-        SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-    )
-else:
-    engine = sqlalchemy.create_engine(SQLALCHEMY_DATABASE_URL)
+class BaseDB:
+    SQLALCHEMY_DATABASE_URL = config("sql_db_url")
 
-SessionLocal = create_session(autocommit=False, autoflush=False, bind=engine)
+    db = Database(SQLALCHEMY_DATABASE_URL)
 
-Base = declarative_base()
-
-find_subclasses("API.Database.Models")
-
-Base.metadata.create_all(bind=engine)
-
-
-def get_db():
-    db = SessionLocal
-    try:
-        yield db
-    finally:
-        db.close()
+    @classmethod
+    async def create_tables(cls):
+        await cls.db.execute(metadata.create_all())

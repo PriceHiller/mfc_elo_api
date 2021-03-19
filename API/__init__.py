@@ -11,7 +11,6 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from starlette.routing import Route
-from starlette.middleware.authentication import AuthenticationMiddleware
 
 from pathlib import Path
 
@@ -24,12 +23,8 @@ root_path = Path(__file__).parent
 
 
 class BaseApplication:
+    app = fastapi.FastAPI(title="MFC Elo")
 
-    app = fastapi.FastAPI()
-
-    #app.add_middleware(
-    #     AuthenticationMiddleware
-    # )
     app.mount("/Static", StaticFiles(directory=str(root_path) + "/Static"), name="Static")
 
     templates = Jinja2Templates(directory=str(root_path) + "/Templates")
@@ -43,6 +38,18 @@ class BaseApplication:
         for route in BaseApplication.app.routes:
             if isinstance(route, Route):
                 log.info(f"Registered route: \"{route.path}\", methods: {route.methods}")
+
+        from API.Database import BaseDB
+
+        await BaseDB.db.connect()
+
+    @staticmethod
+    @app.on_event("shutdown")
+    async def shutdown() -> None:
+
+        from API.Database import BaseDB
+
+        await BaseDB.db.disconnect()
 
     def serve(self, sockets=None):
         return UvicornServer(config=self.config).serve(sockets=sockets)
@@ -66,12 +73,16 @@ class BaseApplication:
     def run(cls, *args, **kwargs) -> None:
 
         from API.Endpoints import BaseEndpoint
+        from API.Database import BaseDB
+        from API.Database.Models import ModelBase
 
         # Logging Configuration
         cls._setup_logging()
 
         # FastAPI setup
         BaseEndpoint.load_endpoints()
+        ModelBase.load_models()
+
         # Finished setup, run it
         uvloop.install()
         asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
@@ -82,6 +93,8 @@ class BaseApplication:
 
         # To define more asynchronous applications to be ran that can be done via
         # loop.create_task(YOUR_APPLICATION) pior to loop.run_until_complete
+        loop.create_task(BaseDB.create_tables())
+        loop.run_until_complete(BaseDB.db.connect())
 
 
 def find_subclasses(package: str = "API", recursive: bool = True) -> None:
