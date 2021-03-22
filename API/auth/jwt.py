@@ -1,5 +1,8 @@
 import logging
-import time
+
+from datetime import datetime
+from datetime import timedelta
+from datetime import timezone
 
 from jose import jwt
 
@@ -18,6 +21,8 @@ class JWTBearer(HTTPBearer):
     JWT_SECRET = config("jwt_secret")
     JWT_ALGORITHM = config("jwt_algorithm")
 
+    timezone = timezone.utc
+
     def __init__(self, auto_error: bool = False):
         super(JWTBearer, self).__init__(auto_error=auto_error)
 
@@ -27,7 +32,9 @@ class JWTBearer(HTTPBearer):
                 raise HTTPException(status_code=403, detail="Invalid authentication scheme.")
             if not self.verify_jwt(credentials.credentials):
                 raise HTTPException(status_code=403, detail="Invalid token or expired token.")
-            return credentials
+            log.info(f"Successful authentication with token: {credentials.credentials}")
+            user_id: int = self.decode_jwt(credentials.credentials)["user_id"]
+            return credentials, user_id
         else:
             raise HTTPException(status_code=403, detail="Invalid authorization code.")
 
@@ -51,14 +58,18 @@ class JWTBearer(HTTPBearer):
         return token_is_valid
 
     @classmethod
-    def sign_jwt(cls, user_id: str, expiry_time_seconds: int = 600) -> str:
-        expiry_time = expiry_time_seconds + time.time()
+    def sign_jwt(cls, user_id: [str, id], expiry_time: timedelta = timedelta(minutes=10)) -> str:
 
+        expiry_time = str(datetime.now(tz=cls.timezone) + expiry_time)
+
+        log.info(f"Issued a token for user_id: \"{user_id}\" that expires \"{expiry_time}\"")
         payload = {
             "user_id": user_id,
-            "expires": expiry_time + time.time()
+            "expires": expiry_time
         }
+
         token = "Bearer " + jwt.encode(payload, cls.JWT_SECRET, algorithm=cls.JWT_ALGORITHM)
+
         return token
 
     @classmethod
@@ -66,7 +77,8 @@ class JWTBearer(HTTPBearer):
         token = token.replace("Bearer ", "")
         try:
             decoded_token = jwt.decode(token, cls.JWT_SECRET, algorithms=[cls.JWT_ALGORITHM])
-            return decoded_token if decoded_token["expires"] >= time.time() else None
+            expiry_time = datetime.fromisoformat(decoded_token["expires"])
+            return decoded_token if expiry_time >= datetime.now(tz=cls.timezone) else None
         except Exception as error:
             log.error(error)
             return {}

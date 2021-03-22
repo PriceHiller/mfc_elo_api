@@ -5,11 +5,9 @@ from . import AlcBase
 
 
 class User(ModelBase, AlcBase):
-
-
     __tablename__ = "users"
 
     username = sqlalchemy.Column(sqlalchemy.String, unique=True, index=True)
     hashed_password = sqlalchemy.Column(sqlalchemy.String)
     email = sqlalchemy.Column(sqlalchemy.String, unique=True, index=True)
-    is_active = sqlalchemy.Column(sqlalchemy.Boolean, default=True)
+    is_active = sqlalchemy.Column(sqlalchemy.Boolean, default=True, nullable=False)

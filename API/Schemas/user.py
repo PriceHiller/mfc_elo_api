@@ -1,4 +1,5 @@
 from typing import Optional
+from typing import Any
 
 from pydantic import BaseModel
 from pydantic import Field
@@ -28,6 +29,7 @@ class UserPW(BaseUser):
         }
 
 
-class User(BaseUser):
-    id: int
+class JWTUser(BaseUser):
+    id: Any
     is_active: bool
+    token: str
