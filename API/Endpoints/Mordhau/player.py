@@ -52,7 +52,6 @@ class MordhauPlayer(BaseEndpoint):
     @staticmethod
     @route.post("/delete", tags=tags)
     async def delete(player_id: str = Query(None, min_length=32, max_length=36), auth=Depends(JWTBearer())):
-
         if player_id and await get_player_by_id(player_id):
             log.info(f"User id \"{auth[-1]}\" issued a delete of Mordhau Player id \"{player_id}\"")
             await delete_player(player_id)
