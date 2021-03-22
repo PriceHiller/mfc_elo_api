@@ -11,4 +11,4 @@ class Team(ModelBase, AlcBase):
 
     team_name = sqlalchemy.Column(sqlalchemy.String, unique=True, nullable=False)
     elo = sqlalchemy.Column(sqlalchemy.Integer, index=True, nullable=False)
-    player = relationship("mfc_players", cascade="all", default=-1)
+    player = relationship("mfc_players", cascade="all", default=-1, nullable=True)
