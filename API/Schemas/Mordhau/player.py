@@ -12,5 +12,4 @@ class BasePlayer(BaseModel):
 
 
 class Player(BasePlayer):
-    steam64 = Optional[Field(min_length=17,
-                             max_length=17)]
+    steam64: Optional[str] = None

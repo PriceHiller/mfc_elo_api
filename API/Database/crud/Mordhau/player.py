@@ -2,6 +2,7 @@ from fastapi.exceptions import HTTPException
 from fastapi import status
 
 from asyncpg.exceptions import UniqueViolationError
+from databases.backends.postgres import Record
 
 from API.Database.Models.Mordhau.player import Player as ModelPlayer
 from API.Database import BaseDB
@@ -63,3 +64,16 @@ async def get_player_by_id(id) -> ModelPlayer:
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Could not find player: {id}",
         )
+
+
+async def get_players():
+    query: ModelPlayer.__table__.select = ModelPlayer.__table__.select()
+
+    if result := await db.fetch_all(query):
+        players = []
+        for player in result:
+            player = dict(player)
+            player["id"] = str(player["id"])
+            players.append(player)
+        return players
+    return []
