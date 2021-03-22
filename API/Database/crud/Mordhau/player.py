@@ -40,8 +40,8 @@ async def create_player(player: SchemaPlayer) -> str:
 
 
 async def delete_player(player_id):
-    query = ModelPlayer.__table__.delete().select(
-        player_id=player_id
+    query: ModelPlayer.__table__.delete = ModelPlayer.__table__.delete(
+        ModelPlayer.id == player_id
     )
 
     return await db.execute(query)
