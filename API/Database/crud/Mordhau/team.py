@@ -8,8 +8,6 @@ from API.Database import BaseDB
 
 from API.Schemas.Mordhau.team import Team as SchemaTeam
 
-from API.auth import get_password_hash
-
 db = BaseDB.db
 
 
@@ -25,10 +23,9 @@ async def create_team(team: SchemaTeam):
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Team already exists")
 
 
-async def delete_team(team: SchemaTeam):
+async def delete_team(team_id):
     query = ModelTeam.__table__.delete().select(
-        team_name=team.team_name,
-        elo=team.elo
+        team_id=team_id
     )
 
     return await db.execute(query)

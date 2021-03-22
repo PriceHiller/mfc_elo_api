@@ -8,8 +8,9 @@ from pydantic import Field
 class BasePlayer(BaseModel):
     player_name: str
     playfab_id: str
+    team_id: str
 
 
-class SteamPlayer(BasePlayer):
-    steam64 = Field(min_length=17,
-                    max_length=17)
+class Player(BasePlayer):
+    steam64 = Optional[Field(min_length=17,
+                             max_length=17)]
