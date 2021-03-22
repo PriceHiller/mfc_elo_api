@@ -32,8 +32,8 @@ class JWTBearer(HTTPBearer):
                 raise HTTPException(status_code=403, detail="Invalid authentication scheme.")
             if not self.verify_jwt(credentials.credentials):
                 raise HTTPException(status_code=403, detail="Invalid token or expired token.")
-            log.info(f"Successful authentication with token: {credentials.credentials}")
             user_id: int = self.decode_jwt(credentials.credentials)["user_id"]
+            log.info(f"Successful authentication for user id \"{user_id}\" with token: \"{credentials.credentials}\"")
             return credentials, user_id
         else:
             raise HTTPException(status_code=403, detail="Invalid authorization code.")
@@ -50,6 +50,7 @@ class JWTBearer(HTTPBearer):
 
         try:
             payload = self.decode_jwt(jwt_token)
+
         except Exception:
             payload = None
 

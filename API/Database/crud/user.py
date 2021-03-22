@@ -3,6 +3,8 @@ from fastapi import status
 
 from asyncpg.exceptions import UniqueViolationError
 
+from databases.backends.postgres import Record
+
 from API.Database.Models.user import User as ModelUser
 from API.Database import BaseDB
 
@@ -31,8 +33,8 @@ async def get_user_by_username(username: str) -> ModelUser:
     query: ModelUser.__table__.select = ModelUser.__table__.select().where(
         ModelUser.username == username
     )
-
     if result := await db.fetch_one(query):
+        result: Record
         return ModelUser(**dict(result))
     else:
         raise HTTPException(

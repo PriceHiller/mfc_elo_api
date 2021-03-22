@@ -2,6 +2,7 @@ from fastapi.exceptions import HTTPException
 from fastapi import status
 
 from asyncpg.exceptions import UniqueViolationError
+from asyncpg.exceptions import DataError
 
 from API.Database.Models.Mordhau.team import Team as ModelTeam
 from API.Database import BaseDB
@@ -45,15 +46,18 @@ async def get_team_by_name(team_name: str) -> ModelTeam:
         )
 
 
-async def get_team_by_id(id) -> ModelTeam:
+async def get_team_by_id(id) -> [ModelTeam, str]:
     query: ModelTeam.__table__.select = ModelTeam.__table__.select().where(
         ModelTeam.id == id
     )
+    try:
+        if result := await db.fetch_one(query):
+            return ModelTeam(**dict(result))
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Could not find team: {id}",
+            )
+    except DataError:
+        return None
 
-    if result := await db.fetch_one(query):
-        return ModelTeam(**dict(result))
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Could not find team: {id}",
-        )
