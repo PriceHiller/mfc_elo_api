@@ -76,7 +76,7 @@ class MordhauTeam(BaseEndpoint):
             await delete_team(team_id)
 
     @staticmethod
-    @route.post("/elo", tags=tags)
+    @route.post("/update-elo", tags=tags)
     async def update_elo(new_elo: int,
                          team_id: str = Query(..., min_length=32, max_length=36),
                          auth=Depends(JWTBearer())):
