@@ -11,4 +11,4 @@ class Player(ModelBase, AlcBase):
     player_name = sqlalchemy.Column(sqlalchemy.String, index=True, nullable=False)
     playfab_id = sqlalchemy.Column(sqlalchemy.String, unique=True, index=True, nullable=False)
     steam64 = sqlalchemy.Column(sqlalchemy.Integer, unique=True, nullable=True)
-    team_id = sqlalchemy.Column(UUID, sqlalchemy.ForeignKey("mfc_teams.id"))
+    team_id = sqlalchemy.Column(UUID, sqlalchemy.ForeignKey("mfc_teams.id", ondelete="SET NULL"), nullable=True)

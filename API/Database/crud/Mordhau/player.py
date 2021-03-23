@@ -16,14 +16,17 @@ db = BaseDB.db
 
 async def create_player(player: SchemaPlayer) -> str:
     if player.team_id:
-        player.team_id = await get_team_by_id(player.team_id)
-        if not player.team_id:
+        team = await get_team_by_id(player.team_id)
+        if not team:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                                 detail=f"Team with ID {player.team_id} not found")
-        query = ModelPlayer.__table__.insert().select(
+        player.team_id = str(team.id)
+        print(player)
+        print(player.team_id)
+        query = ModelPlayer.__table__.insert().values(
             player_name=player.player_name,
             playfab_id=player.playfab_id,
-            steam_id=player.steam64,
+            steam64=player.steam64,
             team_id=player.team_id
         )
     else:
