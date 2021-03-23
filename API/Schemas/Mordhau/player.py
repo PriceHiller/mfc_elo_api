@@ -1,9 +1,6 @@
 from typing import Optional
-from typing import Any
 
 from pydantic import BaseModel
-from pydantic import Field
-from pydantic import UUID4
 
 
 class BasePlayer(BaseModel):
