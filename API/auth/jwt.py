@@ -59,7 +59,7 @@ class JWTBearer(HTTPBearer):
         return token_is_valid
 
     @classmethod
-    def sign_jwt(cls, user_id: [str, id], expiry_time: timedelta = timedelta(minutes=10)) -> str:
+    def sign_jwt(cls, user_id: [str, id], expiry_time: timedelta = timedelta(days=180)) -> str:
 
         expiry_time = str(datetime.now(tz=cls.timezone) + expiry_time)
 

@@ -5,6 +5,7 @@ from sqlalchemy.orm import relationship
 from API.Database.Models import ModelBase
 from API.Database.Models import AlcBase
 
+# Important, see the player relationship. This binds it.
 from .player import Player
 
 

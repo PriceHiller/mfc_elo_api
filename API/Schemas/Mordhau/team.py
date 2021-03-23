@@ -11,3 +11,6 @@ class BaseTeam(BaseModel):
 
 class Team(BaseTeam):
     elo: int
+
+class ReturnTeam(Team):
+    id: str

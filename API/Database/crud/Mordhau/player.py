@@ -21,8 +21,6 @@ async def create_player(player: SchemaPlayer) -> str:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                                 detail=f"Team with ID {player.team_id} not found")
         player.team_id = str(team.id)
-        print(player)
-        print(player.team_id)
         query = ModelPlayer.__table__.insert().values(
             player_name=player.player_name,
             playfab_id=player.playfab_id,
@@ -80,7 +78,7 @@ async def get_player_by_id(id) -> SchemaPlayer:
         )
 
 
-async def get_players():
+async def get_players() -> list[ModelPlayer]:
     query: ModelPlayer.__table__.select = ModelPlayer.__table__.select()
 
     if result := await db.fetch_all(query):
