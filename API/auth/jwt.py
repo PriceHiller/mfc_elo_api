@@ -1,3 +1,4 @@
+import os
 import logging
 
 from datetime import datetime
@@ -5,8 +6,6 @@ from datetime import timedelta
 from datetime import timezone
 
 from jose import jwt
-
-from decouple import config
 
 from fastapi import Request
 from fastapi import Response
@@ -18,8 +17,13 @@ log = logging.getLogger(__name__)
 
 
 class JWTBearer(HTTPBearer):
-    JWT_SECRET = config("jwt_secret")
-    JWT_ALGORITHM = config("jwt_algorithm")
+    JWT_SECRET = os.getenv("jwt_secret").strip()
+    if not JWT_SECRET:
+        raise AttributeError(f"JWT_SECRET does not have an environment variable: \"jwt_secret\"")
+
+    JWT_ALGORITHM = os.getenv("jwt_algorithm")
+    if not JWT_ALGORITHM:
+        raise AttributeError(f"JWT_ALGORITHM does not have an environment variable: \"jwt_algorithm\"")
 
     timezone = timezone.utc
 

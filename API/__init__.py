@@ -1,4 +1,6 @@
 import asyncio
+import os
+
 import uvloop
 import logging
 
@@ -31,6 +33,15 @@ class BaseApplication:
 
     def __init__(self, config: UvicornConfiguration = UvicornConfiguration(app=app, reload=True)):
         self.config = config
+
+    @staticmethod
+    def load_env(path: Path = root_path / ".env"):
+        with open(path, "r") as dot_env:
+            for line in dot_env.readlines():
+                if "#" not in line[0]:
+                    line = line.strip()
+                    split_line = line.split("=")
+                    os.environ[split_line[0]] = split_line[-1]
 
     @staticmethod
     @app.on_event("startup")
@@ -74,6 +85,8 @@ class BaseApplication:
     @classmethod
     def run(cls, *args, **kwargs) -> None:
 
+        BaseApplication.load_env()
+
         from API.Endpoints import BaseEndpoint
         from API.Database import BaseDB
         from API.Database.Models import ModelBase
@@ -112,7 +125,6 @@ def find_subclasses(package: str = "API", recursive: bool = True) -> None:
         importlib.import_module(full_name)
         if recursive and is_pkg:
             find_subclasses(full_name, recursive)
-
 
 __all__ = [
     "BaseApplication"
