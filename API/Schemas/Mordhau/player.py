@@ -17,7 +17,7 @@ class BasePlayer(BaseModel):
 
 
 class Player(BasePlayer):
-    steam64: Optional[int]
+    pass
 
 
 class PlayerID(Player):
