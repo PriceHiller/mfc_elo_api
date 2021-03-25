@@ -5,17 +5,25 @@ from pydantic import BaseModel
 from pydantic import Field
 from pydantic import EmailStr
 
+from API.Schemas import BaseInDB
+
+from .token import TokenInDB
+
 
 class BaseUser(BaseModel):
     username: str = Field(min_length=3,
                           max_length=36)
-    email: Optional[EmailStr] = None
 
     class Config:
         orm_mode = True
 
 
-class UserPW(BaseUser):
+class User(BaseUser):
+    ...
+
+
+class UserCreate(BaseUser):
+    email: Optional[EmailStr] = None
     password: str = Field(min_length=8,
                           regex=R"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$")
 
@@ -23,13 +31,25 @@ class UserPW(BaseUser):
         schema_extra = {
             "example": {
                 "username": "John Smith",
-                "email": "johnsmith@email.com",
-                "password": "SomeSecurePassword@321"
+                "email": "jsmith@email.com",
+                "password": "SomeSecurePassword4321@"
             }
         }
 
 
-class JWTUser(BaseUser):
-    id: Any
+class BaseUserInDB(BaseUser, BaseInDB):
+    username: str
+
+
+class UserInDB(BaseUserInDB):
+    ...
+
+
+class UserInDBExtra(UserInDB):
+    token: Optional[TokenInDB] = None
+    email: Optional[str] = None
     is_active: bool
-    token: str
+
+
+class UserInDBPassword(UserInDBExtra):
+    hashed_password: str

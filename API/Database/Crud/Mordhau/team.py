@@ -2,19 +2,23 @@ from fastapi.exceptions import HTTPException
 from fastapi import status
 
 from asyncpg.exceptions import UniqueViolationError
-from asyncpg.exceptions import DataError
 
 from API.Database.Models.Mordhau.team import Team as ModelTeam
+from API.Database.Models.Mordhau.player import Player as ModelPlayer
+
 from API.Database import BaseDB
 
-from API.Schemas.Mordhau.team import ReturnTeam
+from API.Schemas.Mordhau.team import BaseTeamInDB as SchemaTeamInDB
 from API.Schemas.Mordhau.team import Team as SchemaTeam
+from API.Schemas.Mordhau.player import Player as SchemaPlayer
+from API.Schemas.Mordhau.player import PlayerInDB as SchemaPlayerInDB
+
+from .player import get_player_by_id
 
 db = BaseDB.db
 
 
 async def create_team(team: SchemaTeam):
-    print(team)
     query = ModelTeam.__table__.insert().values(
         team_name=team.team_name,
         elo=team.elo
@@ -34,27 +38,21 @@ async def delete_team(team_id):
     return await db.execute(query)
 
 
-async def get_teams() -> list[ReturnTeam]:
+async def get_teams() -> list[SchemaTeamInDB]:
     query: ModelTeam.__table__.select = ModelTeam.__table__.select()
 
     if result := await db.fetch_all(query):
-        teams = []
-        for team in result:
-            team = dict(team)
-            team["id"] = str(team["id"])
-            teams.append(ReturnTeam(**team))
-        return teams
+        return [SchemaTeamInDB(**dict(team)) for team in result]
     return []
 
 
-async def get_team_by_name(team_name: str) -> ReturnTeam:
+async def get_team_by_name(team_name: str) -> SchemaTeamInDB:
     query: ModelTeam.__table__.select = ModelTeam.__table__.select().where(
         ModelTeam.team_name == team_name
     )
 
-    if result := dict(await db.fetch_one(query)):
-        result["id"] = str(result["id"])
-        return ReturnTeam(**result)
+    if result := await db.fetch_one(query):
+        return SchemaTeamInDB(**dict(result))
     else:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -62,13 +60,12 @@ async def get_team_by_name(team_name: str) -> ReturnTeam:
         )
 
 
-async def get_team_by_id(id) -> ReturnTeam:
+async def get_team_by_id(id) -> SchemaTeamInDB:
     query: ModelTeam.__table__.select = ModelTeam.__table__.select().where(
         ModelTeam.id == id
     )
     if result := dict(await db.fetch_one(query)):
-        result["id"] = str(result["id"])
-        return ReturnTeam(**result)
+        return SchemaTeamInDB(**dict(result))
     else:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -94,3 +91,29 @@ async def update_elo(team_id, new_elo: int):
     await db.execute(query)
 
     return await get_team_by_id(team_id)
+
+
+async def add_player_to_team(player_id, team_id):
+    player = await get_player_by_id(player_id)
+    team = await get_team_by_id(team_id)
+
+    query: ModelPlayer.__table__.update = ModelPlayer.__table__.update().where(
+        ModelPlayer.id == player.id
+    ).values(team_id=team.id)
+
+    await db.execute(query)
+
+    return await get_team_by_id(player.id)
+
+
+async def remove_player_from_team(player_id, team_id):
+    player = await get_player_by_id(player_id)
+    await get_team_by_id(team_id)
+
+    query: ModelPlayer.__table__.update = ModelPlayer.__table__.update().where(
+        ModelPlayer.id == player.id
+    ).values(team_id=None)
+
+    await db.execute(query)
+
+    return await get_team_by_id(player.id)

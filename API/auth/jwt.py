@@ -45,11 +45,12 @@ class JWTBearer(HTTPBearer):
                     request.scope["headers"].append((b'authorization', session_token.encode()))
         return await super(JWTBearer, self).__call__(request)
 
-    def verify_jwt(self, jwt_token: str) -> bool:
+    @classmethod
+    def verify_jwt(cls, jwt_token: str) -> bool:
         token_is_valid: bool = False
 
         try:
-            payload = self.decode_jwt(jwt_token)
+            payload = cls.decode_jwt(jwt_token)
 
         except Exception:
             payload = None
@@ -59,17 +60,20 @@ class JWTBearer(HTTPBearer):
         return token_is_valid
 
     @classmethod
-    def sign_jwt(cls, user_id: [str, id], expiry_time: timedelta = timedelta(days=180)) -> str:
+    def sign_jwt(cls, user_id: [str, id], expiry_time: timedelta = timedelta(days=180), remove_bearer=False) -> str:
 
         expiry_time = str(datetime.now(tz=cls.timezone) + expiry_time)
 
         log.info(f"Issued a token for user_id: \"{user_id}\" that expires \"{expiry_time}\"")
         payload = {
-            "user_id": user_id,
+            "user_id": str(user_id),
             "expires": expiry_time
         }
-
-        token = "Bearer " + jwt.encode(payload, cls.JWT_SECRET, algorithm=cls.JWT_ALGORITHM)
+        encoded_token = jwt.encode(payload, cls.JWT_SECRET, algorithm=cls.JWT_ALGORITHM)
+        if remove_bearer:
+            token = encoded_token
+        else:
+            token = "Bearer " + encoded_token
 
         return token
 
@@ -87,3 +91,13 @@ class JWTBearer(HTTPBearer):
     @staticmethod
     async def grant_cookie(response: Response, token: str):
         response.set_cookie("session", token)
+
+    @staticmethod
+    async def remove_cookie(response: Response):
+        cookie = response.headers.get("session")
+        response.delete_cookie("session")
+        return cookie
+
+    @staticmethod
+    async def get_cookie_from_header(response: Response):
+        return response.headers.get("session")

@@ -6,15 +6,18 @@ from fastapi import Query
 from fastapi import status
 from fastapi.exceptions import HTTPException
 
+from API.Database.Crud.User.user import check_user
 from API.auth import JWTBearer
 
-from API.Database.crud.Mordhau.team import get_teams
-from API.Database.crud.Mordhau.team import get_team_by_id
-from API.Database.crud.Mordhau.team import get_team_by_name
-from API.Database.crud.Mordhau.team import create_team
-from API.Database.crud.Mordhau.team import delete_team
-from API.Database.crud.Mordhau.team import update_name
-from API.Database.crud.Mordhau.team import update_elo
+from API.Database.Crud.Mordhau.team import get_teams
+from API.Database.Crud.Mordhau.team import remove_player_from_team
+from API.Database.Crud.Mordhau.team import add_player_to_team
+from API.Database.Crud.Mordhau.team import get_team_by_id
+from API.Database.Crud.Mordhau.team import get_team_by_name
+from API.Database.Crud.Mordhau.team import create_team
+from API.Database.Crud.Mordhau.team import delete_team
+from API.Database.Crud.Mordhau.team import update_name
+from API.Database.Crud.Mordhau.team import update_elo
 
 from API.Endpoints import BaseEndpoint
 
@@ -58,6 +61,7 @@ class MordhauTeam(BaseEndpoint):
     async def update_name(new_name: str,
                           team_id: str = Query(..., min_length=32, max_length=36),
                           auth=Depends(JWTBearer())):
+        await check_user(token=auth[0], user_id=auth[-1])
         if team_id and await get_team_by_id(team_id):
             log.info(f"User id \"{auth[-1]}\" updated team_id \"{team_id}\" team name to \"{new_name}\"")
             return await update_name(team_id, new_name)
@@ -65,12 +69,15 @@ class MordhauTeam(BaseEndpoint):
     @staticmethod
     @route.post("/create", tags=tags)
     async def create(team: Team, auth=Depends(JWTBearer())) -> dict[str, str]:
-        log.info(f"User id \"{auth[-1]}\" issued a creation of Mordhau Team \"{team.team_name}\"")
+        await check_user(token=auth[0], user_id=auth[-1])
+        log.info(f"User id \"{auth[-1]}\" issued a creation of "
+                 f"Mordhau Team \"{team.team_name}\"")
         return {"Team ID": await create_team(team)}
 
     @staticmethod
     @route.post("/delete", tags=tags)
     async def delete(team_id: str = Query(..., min_length=32, max_length=36), auth=Depends(JWTBearer())):
+        await check_user(token=auth[0], user_id=auth[-1])
         if team_id and await get_team_by_id(team_id):
             log.info(f"User id \"{auth[-1]}\" issued a delete of Mordhau Team id \"{team_id}\"")
             await delete_team(team_id)
@@ -80,6 +87,19 @@ class MordhauTeam(BaseEndpoint):
     async def update_elo(new_elo: int,
                          team_id: str = Query(..., min_length=32, max_length=36),
                          auth=Depends(JWTBearer())):
+        await check_user(token=auth[0], user_id=auth[-1])
         if team_id and await get_team_by_id(team_id):
             log.info(f"User id \"{auth[-1]}\" updated team_id \"{team_id}\" elo to {new_elo}")
             return await update_elo(team_id, new_elo)
+
+    @staticmethod
+    @route.post("/add-player-to-team", tags=tags)
+    async def add_player_to_team(player_id, team_id, auth=Depends(JWTBearer())):
+        await check_user(token=auth[0], user_id=auth[-1])
+        return await add_player_to_team(player_id, team_id)
+
+    @staticmethod
+    @route.post("/remove-player-from-team", tags=tags)
+    async def remove_player_from_team(player_id, team_id, auth=Depends(JWTBearer())):
+        await check_user(token=auth[0], user_id=auth[-1])
+        return await remove_player_from_team(player_id, team_id)

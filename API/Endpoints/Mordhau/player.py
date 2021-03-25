@@ -1,23 +1,26 @@
 import logging
 
+from typing import List
+
 from fastapi import APIRouter
 from fastapi import Depends
 from fastapi import Query
 from fastapi import status
 from fastapi.exceptions import HTTPException
 
-
+from API.Database.Crud.User.user import check_user
 from API.auth import JWTBearer
 
 from API.Endpoints import BaseEndpoint
 
-from API.Database.crud.Mordhau.player import get_players
-from API.Database.crud.Mordhau.player import get_player_by_id
-from API.Database.crud.Mordhau.player import get_player_by_name
-from API.Database.crud.Mordhau.player import create_player
-from API.Database.crud.Mordhau.player import delete_player
+from API.Database.Crud.Mordhau.player import get_players
+from API.Database.Crud.Mordhau.player import get_player_by_id
+from API.Database.Crud.Mordhau.player import get_player_by_name
+from API.Database.Crud.Mordhau.player import create_player
+from API.Database.Crud.Mordhau.player import delete_player
 
 from API.Schemas.Mordhau.player import Player
+from API.Schemas.Mordhau.player import PlayerInDB
 
 log = logging.getLogger(__name__)
 
@@ -28,7 +31,7 @@ class MordhauPlayer(BaseEndpoint):
     route = APIRouter(prefix="/player")
 
     @staticmethod
-    @route.get("/all", tags=tags)
+    @route.get("/all", tags=tags, response_model=List[PlayerInDB])
     async def player():
         return await get_players()
 
@@ -39,29 +42,35 @@ class MordhauPlayer(BaseEndpoint):
             return player
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Player with id \"{id}\" not found"
+            detail=f"Player with id {id} not found"
         )
 
     @staticmethod
     @route.get("/name", tags=tags)
-    async def name(player_name: str) -> Player:
+    async def name(player_name: str) -> PlayerInDB:
         if player := await get_player_by_name(player_name):
             return player
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Player with name \"{player_name}\" not found"
+            detail=f"Player with name {player_name} not found"
         )
 
     @staticmethod
     @route.post("/create", tags=tags)
     async def create(player: Player, auth=Depends(JWTBearer())) -> dict[str, str]:
+        await check_user(token=auth[0], user_id=auth[-1])
         log.info(f"User id \"{auth[-1]}\" issued a creation of Mordhau Player \"{player.player_name}\"")
         return {"Player ID": await create_player(player)}
 
     @staticmethod
     @route.post("/delete", tags=tags)
     async def delete(player_id: str = Query(..., min_length=32, max_length=36), auth=Depends(JWTBearer())):
+        await check_user(token=auth[0], user_id=auth[-1])
         if player_id and await get_player_by_id(player_id):
             log.info(f"User id \"{auth[-1]}\" issued a delete of Mordhau Player id \"{player_id}\"")
             await delete_player(player_id)
             return {"Deleted player": player_id}
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Player {player_id} could not be found"
+        )

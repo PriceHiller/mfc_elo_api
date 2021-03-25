@@ -17,9 +17,6 @@ class Match(ModelBase, AlcBase):
 
     __tablename__ = "mfc_matches"
 
-    team1_sets_won = sqlalchemy.Column(sqlalchemy.Float, index=True, nullable=False, default=0)
-    team2_sets_won = sqlalchemy.Column(sqlalchemy.Float, index=True, nullable=False, default=0)
-
     team1_id = sqlalchemy.Column(
         UUID,
         sqlalchemy.ForeignKey("mfc_teams.id", ondelete="SET NULL"),
@@ -32,4 +29,4 @@ class Match(ModelBase, AlcBase):
         nullable=True,
         index=True
     )
-    sets = relationship(Set, cascade="all, delete")
+    sets = relationship(Set, cascade="all, delete", passive_deletes=True)

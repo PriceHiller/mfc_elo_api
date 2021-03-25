@@ -1,8 +1,6 @@
-from typing import Optional
-from typing import Any
-
 from pydantic import BaseModel
-from pydantic import Field
+
+from API.Schemas import BaseInDB
 
 
 class BaseTeam(BaseModel):
@@ -12,5 +10,6 @@ class BaseTeam(BaseModel):
 class Team(BaseTeam):
     elo: int
 
-class ReturnTeam(Team):
-    id: str
+
+class BaseTeamInDB(Team, BaseInDB):
+    ...

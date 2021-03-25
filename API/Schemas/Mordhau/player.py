@@ -2,10 +2,14 @@ from typing import Optional
 
 from pydantic import BaseModel
 
+from API.Schemas import BaseInDB
+
 
 class BasePlayer(BaseModel):
     player_name: str
     playfab_id: str
+    discord_id: Optional[int]
+    team_id: Optional[str]
 
     class Config:
         schema_extra = {
@@ -17,9 +21,12 @@ class BasePlayer(BaseModel):
 
 
 class Player(BasePlayer):
-    pass
+    ...
 
 
-class PlayerID(Player):
+class BasePlayerInDB(BasePlayer, BaseInDB):
     id: str
-    team_id: Optional[str]
+
+
+class PlayerInDB(BasePlayerInDB):
+    ...

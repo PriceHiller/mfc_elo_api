@@ -8,9 +8,7 @@ from API.Database.Models.Mordhau.player import Player as ModelPlayer
 from API.Database import BaseDB
 
 from API.Schemas.Mordhau.player import Player as SchemaPlayer
-from API.Schemas.Mordhau.player import PlayerID as SchemaPlayerID
-
-from .team import get_team_by_id
+from API.Schemas.Mordhau.player import PlayerInDB as SchemaPlayerInDB
 
 db = BaseDB.db
 
@@ -19,7 +17,7 @@ async def create_player(player: SchemaPlayer) -> str:
     query: ModelPlayer.__table__.select = ModelPlayer.__table__.insert().values(
         player_name=player.player_name,
         playfab_id=player.playfab_id,
-        steam64=player.steam64,
+        discord_id=player.discord_id
     )
 
     try:
@@ -36,14 +34,13 @@ async def delete_player(player_id):
     return await db.execute(query)
 
 
-async def get_player_by_name(player_name: str) -> SchemaPlayerID:
+async def get_player_by_name(player_name: str) -> SchemaPlayerInDB:
     query: ModelPlayer.__table__.select = ModelPlayer.__table__.select().where(
         ModelPlayer.player_name == player_name
     )
 
-    if result := dict(await db.fetch_one(query)):
-        result["id"] = str(result["id"])
-        return SchemaPlayerID(**result)
+    if result := await db.fetch_one(query):
+        return SchemaPlayerInDB(**dict(result))
     else:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -51,14 +48,13 @@ async def get_player_by_name(player_name: str) -> SchemaPlayerID:
         )
 
 
-async def get_player_by_id(id) -> SchemaPlayerID:
+async def get_player_by_id(id) -> SchemaPlayerInDB:
     query: ModelPlayer.__table__.select = ModelPlayer.__table__.select().where(
         ModelPlayer.id == id
     )
 
     if result := dict(await db.fetch_one(query)):
-        result["id"] = str(result["id"])
-        return SchemaPlayerID(**result)
+        return SchemaPlayerInDB(**result)
     else:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -66,14 +62,9 @@ async def get_player_by_id(id) -> SchemaPlayerID:
         )
 
 
-async def get_players() -> list[SchemaPlayerID]:
+async def get_players() -> list[SchemaPlayerInDB]:
     query: ModelPlayer.__table__.select = ModelPlayer.__table__.select()
 
     if result := await db.fetch_all(query):
-        players = []
-        for player in result:
-            player = dict(player)
-            player["id"] = str(player["id"])
-            players.append(SchemaPlayerID(**player))
-        return players
+        return [SchemaPlayerInDB(**dict(player)) for player in result]
     return []
