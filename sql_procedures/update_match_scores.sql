@@ -30,7 +30,7 @@ LANGUAGE plpgsql AS $$
         COMMIT;
     END;
 $$;
-
+-- Test
 CALL update_match_scores(
     '280d7750-4248-4732-b11c-99d9d163452c',
     '0a4b5e40-a878-47ac-8b80-ebaa95d14ac5',
