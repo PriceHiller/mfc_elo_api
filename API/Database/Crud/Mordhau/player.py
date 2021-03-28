@@ -68,3 +68,21 @@ async def get_players() -> list[SchemaPlayerInDB]:
     if result := await db.fetch_all(query):
         return [SchemaPlayerInDB(**dict(player)) for player in result]
     return []
+
+
+async def get_players_by_team_id(team_id) -> [SchemaPlayerInDB]:
+    query: ModelPlayer.__table__.select = ModelPlayer.__table__.select().where(
+        ModelPlayer.team_id == team_id
+    )
+
+    if result := await db.fetch_all(query):
+        return [SchemaPlayerInDB(**dict(player)) for player in result]
+    return []
+
+
+async def update_player_discord_id(player_id, new_discord_id):
+    query: ModelPlayer.__table__.update = ModelPlayer.__table__.update().where(
+        ModelPlayer.id == player_id
+    ).values(discord_id=new_discord_id)
+
+    return await db.execute(query)

@@ -18,6 +18,7 @@ from API.Database.Crud.Mordhau.player import get_player_by_id
 from API.Database.Crud.Mordhau.player import get_player_by_name
 from API.Database.Crud.Mordhau.player import create_player
 from API.Database.Crud.Mordhau.player import delete_player
+from API.Database.Crud.Mordhau.player import update_player_discord_id
 
 from API.Schemas.Mordhau.player import Player
 from API.Schemas.Mordhau.player import PlayerInDB
@@ -70,6 +71,21 @@ class MordhauPlayer(BaseEndpoint):
             log.info(f"User id \"{auth[-1]}\" issued a delete of Mordhau Player id \"{player_id}\"")
             await delete_player(player_id)
             return {"Deleted player": player_id}
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Player {player_id} could not be found"
+        )
+
+    @staticmethod
+    @route.post("/update-discord-id", tags=tags)
+    async def update_discord_id(discord_id: int = Query(..., min_length=17),
+                                player_id: str = Query(..., min_length=32, max_length=36),
+                                auth=Depends((JWTBearer()))):
+        await check_user(token=auth[0], user_id=auth[-1])
+        if await get_player_by_id(player_id):
+            log.info(f"User ID \"{auth[-1]}\" updated player_id \"{player_id}\" discord id to \"{discord_id}")
+            await update_player_discord_id(player_id, discord_id)
+            return {"Updated Discord ID": player_id}
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Player {player_id} could not be found"

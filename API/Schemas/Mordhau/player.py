@@ -1,6 +1,9 @@
 from typing import Optional
+from typing import Union
 
 from pydantic import BaseModel
+from pydantic import Field
+from pydantic import UUID4
 
 from API.Schemas import BaseInDB
 
@@ -9,7 +12,6 @@ class BasePlayer(BaseModel):
     player_name: str
     playfab_id: str
     discord_id: Optional[int]
-    team_id: Optional[str]
 
     class Config:
         schema_extra = {
@@ -24,9 +26,13 @@ class Player(BasePlayer):
     ...
 
 
+class CreatePlayer(Player):
+    ...
+
+
 class BasePlayerInDB(BasePlayer, BaseInDB):
-    id: str
+    ...
 
 
 class PlayerInDB(BasePlayerInDB):
-    ...
+    team_id: Optional[Union[UUID4, str, int]] = Field(..., minlength=32, maxlength=36)
