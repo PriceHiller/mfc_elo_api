@@ -17,7 +17,7 @@ from .token import create_token
 from .token import get_token_by_user_id
 from .token import get_token_by_token
 
-from API.auth import get_password_hash
+from API.Auth import get_password_hash
 
 db = BaseDB.db
 

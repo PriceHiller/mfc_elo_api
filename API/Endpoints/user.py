@@ -12,8 +12,8 @@ from API.Endpoints import BaseEndpoint
 from API.Schemas.User.user import UserCreate
 from API.Schemas.User.user import UserInDBExtra
 
-from API.auth import JWTBearer
-from API.auth import verify_password
+from API.Auth import JWTBearer
+from API.Auth import verify_password
 
 from API.Database.Crud.User.user import create_user
 from API.Database.Crud.User.user import get_user_by_username

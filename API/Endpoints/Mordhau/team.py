@@ -7,7 +7,7 @@ from fastapi import status
 from fastapi.exceptions import HTTPException
 
 from API.Database.Crud.User.user import check_user
-from API.auth import JWTBearer
+from API.Auth import JWTBearer
 
 from API.Database.Crud.Mordhau.team import get_teams
 from API.Database.Crud.Mordhau.team import remove_player_from_team

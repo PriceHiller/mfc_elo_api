@@ -5,7 +5,7 @@ from fastapi import status
 
 from fastapi.exceptions import HTTPException
 
-from API.auth import JWTBearer
+from API.Auth import JWTBearer
 
 from API.Endpoints import BaseEndpoint
 

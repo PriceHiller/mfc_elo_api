@@ -9,7 +9,7 @@ from API.Database.Models.User.tokens import Token as ModelToken
 from API.Schemas.User.token import TokenInDB as SchemaTokenInDB
 from API.Schemas.User.user import UserInDBExtra as SchemaUserInDB
 
-from API.auth import JWTBearer
+from API.Auth import JWTBearer
 
 db = BaseDB.db
 
