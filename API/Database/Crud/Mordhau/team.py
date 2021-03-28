@@ -10,8 +10,6 @@ from API.Database import BaseDB
 
 from API.Schemas.Mordhau.team import BaseTeamInDB as SchemaTeamInDB
 from API.Schemas.Mordhau.team import Team as SchemaTeam
-from API.Schemas.Mordhau.player import Player as SchemaPlayer
-from API.Schemas.Mordhau.player import PlayerInDB as SchemaPlayerInDB
 
 from .player import get_player_by_id
 
