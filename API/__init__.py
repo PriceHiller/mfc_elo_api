@@ -121,7 +121,7 @@ class BaseApplication:
                 error_attr = str(error).split(" ")[-1].strip("'")
                 print(instance_config)
                 instance_config.pop(error_attr)
-
+        instance_config["loop"] = "uvloop"
         # Finished setup, run it
         uvloop.install()
         asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
