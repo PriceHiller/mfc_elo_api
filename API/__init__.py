@@ -9,8 +9,11 @@ import pkgutil
 
 import fastapi
 
+from starlette.config import Config
+
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from fastapi.responses import ORJSONResponse
 
 from starlette.routing import Route
 
@@ -23,25 +26,25 @@ log = logging.getLogger(__name__)
 
 root_path = Path(__file__).parent
 
+config = Config(root_path / ".env", environ=os.environ)
+
 
 class BaseApplication:
-    app = fastapi.FastAPI(title="MFC Elo")
+    app = fastapi.FastAPI(title="MFC Elo", default_response_class=ORJSONResponse)
 
     app.mount("/Static", StaticFiles(directory=str(root_path) + "/Static"), name="Static")
 
     templates = Jinja2Templates(directory=str(root_path) + "/Templates")
 
-    def __init__(self, config: UvicornConfiguration = UvicornConfiguration(app=app, reload=True)):
-        self.config = config
-
-    @staticmethod
-    def load_env(path: Path = root_path / ".env"):
-        with open(path, "r") as dot_env:
-            for line in dot_env.readlines():
-                if "#" not in line[0]:
-                    line = line.strip()
-                    split_line = line.split("=")
-                    os.environ[split_line[0]] = split_line[-1]
+    def __init__(
+            self,
+            uvicorn_config=UvicornConfiguration(
+                app=app,
+                reload=True,
+                loop="uvloop",
+            )
+    ):
+        self.uvicorn_config = uvicorn_config
 
     @staticmethod
     @app.on_event("startup")
@@ -65,7 +68,7 @@ class BaseApplication:
         await BaseDB.db.disconnect()
 
     def serve(self, sockets=None):
-        return UvicornServer(config=self.config).serve(sockets=sockets)
+        return UvicornServer(config=self.uvicorn_config).serve(sockets=sockets)
 
     @staticmethod
     def _setup_logging() -> None:
@@ -85,8 +88,6 @@ class BaseApplication:
     @classmethod
     def run(cls, *args, **kwargs) -> None:
 
-        BaseApplication.load_env()
-
         from API.Endpoints import BaseEndpoint
         from API.Database import BaseDB
         from API.Database.Models import ModelBase
@@ -98,13 +99,36 @@ class BaseApplication:
         BaseEndpoint.load_endpoints()
         ModelBase.load_models()
 
+        instance_config = vars(cls().uvicorn_config)
+        type_error = True
+
+        base_match = "uvicorn_"
+        while type_error:
+            try:
+                for var in instance_config.keys():
+                    if env_var := config.get(base_match + var, default=None):
+                        if str(env_var).isnumeric():
+                            instance_config[var] = int(env_var)
+                        elif str(env_var).casefold() == "false":
+                            instance_config[var] = False
+                        elif str(env_var).casefold() == "true":
+                            instance_config[var] = True
+                        elif "[" in str(env_var)[0] and "]" in str(env_var)[-1]:
+                            instance_config[env_var] = str(env_var).strip("[").strip("]").split(",")
+                        UvicornConfiguration(**instance_config)
+                type_error = False
+            except TypeError as error:
+                error_attr = str(error).split(" ")[-1].strip("'")
+                print(instance_config)
+                instance_config.pop(error_attr)
+
         # Finished setup, run it
         uvloop.install()
         asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
         loop = asyncio.new_event_loop()
 
-        loop.run_until_complete(asyncio.wait([loop.create_task(cls().serve(sockets=kwargs.get("sockets")))]))
+        loop.run_until_complete(asyncio.wait([loop.create_task(cls(UvicornConfiguration(**instance_config)).serve(sockets=kwargs.get("sockets")))]))
 
         # To define more asynchronous applications to be ran that can be done via
         # loop.create_task(YOUR_APPLICATION) pior to loop.run_until_complete
@@ -126,6 +150,8 @@ def find_subclasses(package: str = "API", recursive: bool = True) -> None:
         if recursive and is_pkg:
             find_subclasses(full_name, recursive)
 
+
 __all__ = [
-    "BaseApplication"
+    "BaseApplication",
+    "find_subclasses"
 ]
