@@ -15,6 +15,7 @@ from API.Database.Crud.Mordhau.Game.match import get_matches_by_team_ids
 from API.Database.Crud.Mordhau.Game.match import get_matches_by_team_id
 from API.Database.Crud.Mordhau.Game.match import get_matches
 from API.Database.Crud.Mordhau.Game.match import create_match
+from API.Database.Crud.User.user import check_user
 
 from API.Schemas import BaseSchema
 from API.Schemas.Mordhau.Game.match import MatchInDB
@@ -59,6 +60,7 @@ class Match(BaseEndpoint):
     @staticmethod
     @route.post("/create-match", tags=tags, response_model=BaseSchema)
     async def create_match(match: CreateMatch, auth=Depends(JWTBearer())):
+        await check_user(token=auth[0], user_id=auth[-1])
         match_id = await create_match(match)
         log.info(f"User \"{auth[-1]}\" created a match \"{match_id}\"")
         return BaseSchema(

@@ -11,7 +11,8 @@ from fastapi.exceptions import HTTPException
 from pydantic import UUID4
 
 from API.Auth import JWTBearer
-from API.Auth import
+
+from API.Database.Crud.User.user import check_user
 
 from API.Database.Crud.Mordhau.Game.round import get_round_by_id
 from API.Database.Crud.Mordhau.Game.round import get_rounds_by_set_id
@@ -63,7 +64,8 @@ class Round(BaseEndpoint):
 
     @staticmethod
     @route.post("/create-round", tags=tags, response_model=BaseSchema)
-    async def create_round(round: CreateRound):
+    async def create_round(round: CreateRound, auth=Depends(JWTBearer())):
+        await check_user(token=auth[0], user_id=auth[-1])
         round_id = await create_round(round)
         return BaseSchema(
             message=f"Created round with id {round_id}",
@@ -101,12 +103,14 @@ class Round(BaseEndpoint):
 
     @staticmethod
     @route.post("/create-round-player", tags=tags, response_model=BaseSchema)
-    async def create_round_player(round_player: CreateRoundPlayer):
+    async def create_round_player(round_player: CreateRoundPlayer, auth=Depends(JWTBearer())):
+        await check_user(token=auth[0], user_id=auth[-1])
         return await create_round_player(round_player)
 
     @staticmethod
     @route.post("/create-all-round-players", tags=tags, response_model=BaseSchema)  # Shit endpoint name, pls god rename
-    async def create_round_all(round_players: CreateRoundPlayers):
+    async def create_round_all(round_players: CreateRoundPlayers, auth=Depends(JWTBearer())):
+        await check_user(token=auth[0], user_id=auth[-1])
         round_player_ids = [str(round_player_id) for round_player_id in await create_all_round_players(round_players)]
         return BaseSchema(
             message=f"Created round with round players, ids: {', '.join(round_player_ids)}",
