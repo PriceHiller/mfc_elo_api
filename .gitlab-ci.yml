@@ -4,7 +4,7 @@
 
 stages: [
     "Setup", "Testing", "Unit", "Initialization", "Code-Quality",
-    "Analysis", "Reporting", "Package", "Distribution", "Export",
+    "Analysis", "Reporting", "UAT", "Package", "Distribution", "Export",
     "Release", "Version"
 ]
 
