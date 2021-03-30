@@ -11,6 +11,7 @@ from fastapi.exceptions import HTTPException
 from pydantic import UUID4
 
 from API.Auth import JWTBearer
+from API.Auth import
 
 from API.Database.Crud.Mordhau.Game.round import get_round_by_id
 from API.Database.Crud.Mordhau.Game.round import get_rounds_by_set_id

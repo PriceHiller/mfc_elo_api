@@ -4,7 +4,7 @@
 
 stages: [
     "Setup", "Testing", "Unit", "Initialization", "Code-Quality",
-    "Analysis", "Reporting", "Package", "Distribution", "Export",
+    "Analysis", "Reporting", "UAT", "Package", "Distribution", "Export",
     "Release", "Version"
 ]
 
@@ -22,12 +22,12 @@ workflow: { rules: [
 ]}
 
 include: [
-    { local: "IO-Git-Leaks.Yaml"                    }, # Stage --> Analysis
-    { local: "IO-Code-Quality.Yaml"                 }, # Stage --> Analysis
-    { local: "IO-Secrets-Detection.Yaml"            }, # Stage --> Analysis
-
-    { local: "IO-Pre-Release.Yaml"                  }, # Stage --> Pre-Release
-    { local: "IO-Release.Yaml"                      }  # Stage --> Release
+    { project: "CI-CD/IO", file: "/IO-Code-Quality.Yaml",               ref: "Development" },
+    { project: "CI-CD/IO", file: "/IO-Secrets-Detection.Yaml",          ref: "Development" },
+    { project: "CI-CD/IO", file: "/IO-Pre-Release.Yaml",                ref: "Development" },
+    { project: "CI-CD/IO", file: "/IO-Release.Yaml",                    ref: "Development" },
+    { project: "CI-CD/IO", file: "/IO-PY-Package.Yaml",                 ref: "Development" },
+    { project: "CI-CD/IO", file: "/IO-Git-Leaks.Yaml",                  ref: "Development" }
 ]
 
 default: { image: { name: "python:alpine" } }
