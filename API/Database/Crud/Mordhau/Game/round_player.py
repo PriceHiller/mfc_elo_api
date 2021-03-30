@@ -52,6 +52,7 @@ async def get_round_player(
                     **dict(_round_player)
                 )
             )
+        return round_players
 
 
 async def get_round_players_by_round_id(round_id):
@@ -65,6 +66,16 @@ async def get_round_players_by_round_id(round_id):
 
 
 async def get_round_player_by_id(id):
+    try:
+        return await get_round_player(ModelRoundPlayer.player_id, id, fetch_one=True)
+    except DataError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid UUID given"
+        )
+
+
+async def get_round_played_by_id(id):
     try:
         return await get_round_player(ModelRoundPlayer.id, id, fetch_one=True)
     except DataError:

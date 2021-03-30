@@ -22,8 +22,10 @@ def parse_rounds(round_players: list[SchemaRoundPlayerInDB]) -> \
     team1 = []
     team2 = []
 
+    if not round_players:
+        return [], []
     for round_player in round_players:
-        if round_player.team_number == 1:
+        if round_player.team_number == 0:
             team1.append(round_player)
         else:
             team2.append(round_player)
@@ -66,9 +68,9 @@ async def get_round(
     else:
         rounds = []
         for _round in result:
-            print(dict(_round))
             single_round = SchemaStrippedRoundInDB(**dict(_round))
             round_players = await get_round_players_by_round_id(single_round.id)
+            print(round_players)
             team1_players, team2_players = parse_rounds(round_players)
             rounds.append(
                 SchemaRoundInDB(

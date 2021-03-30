@@ -18,6 +18,7 @@ from API.Database.Crud.Mordhau.Game.round import get_rounds
 from API.Database.Crud.Mordhau.Game.round import create_round
 
 from API.Database.Crud.Mordhau.Game.round_player import get_round_player_by_id
+from API.Database.Crud.Mordhau.Game.round_player import get_round_played_by_id
 from API.Database.Crud.Mordhau.Game.round_player import get_round_players
 from API.Database.Crud.Mordhau.Game.round_player import create_round_player
 from API.Database.Crud.Mordhau.Game.round_player import create_all_round_players
@@ -42,7 +43,12 @@ class Round(BaseEndpoint):
     @staticmethod
     @route.get("/round-id", tags=tags, response_model=RoundInDB)
     async def get_round_by_id(id):
-        return await get_round_by_id(id)
+        if result := await get_round_by_id(id):
+            return result
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Could not find round with id: {id}"
+        )
 
     @staticmethod
     @route.get("/by-set-id", tags=tags, response_model=list[RoundInDB])
@@ -68,9 +74,24 @@ class Round(BaseEndpoint):
         )
 
     @staticmethod
+    @route.get("/round-played-id", tags=tags, response_model=RoundPlayerInDB)
+    async def get_round_played_by_id(round_player_id):
+        if result := await get_round_played_by_id(round_player_id):
+            return result
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Player rounds not found for id {round_player_id}"
+        )
+
+    @staticmethod
     @route.get("/round-player-id", tags=tags, response_model=RoundPlayerInDB)
-    async def get_round_player_by_id(round_player_id):
-        return await get_round_player_by_id(round_player_id)
+    async def get_rounds_by_player_id(round_player_id):
+        if result := await get_round_player_by_id(round_player_id):
+            return result
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Player rounds not found for id {round_player_id}"
+        )
 
     @staticmethod
     @route.get("/round-players-all", tags=tags, response_model=list[RoundPlayerInDB])
@@ -85,7 +106,6 @@ class Round(BaseEndpoint):
     @staticmethod
     @route.post("/create-all-round-players", tags=tags, response_model=BaseSchema)  # Shit endpoint name, pls god rename
     async def create_round_all(round_players: CreateRoundPlayers):
-        print(round_players)
         round_player_ids = [str(round_player_id) for round_player_id in await create_all_round_players(round_players)]
         return BaseSchema(
             message=f"Created round with round players, ids: {', '.join(round_player_ids)}",
