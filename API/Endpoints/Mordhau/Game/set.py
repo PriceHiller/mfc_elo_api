@@ -15,6 +15,7 @@ from API.Database.Crud.Mordhau.Game.set import get_sets_by_match_id
 from API.Database.Crud.Mordhau.Game.set import get_sets_by_map
 from API.Database.Crud.Mordhau.Game.set import get_sets
 from API.Database.Crud.Mordhau.Game.set import create_set
+from API.Database.Crud.User.user import check_user
 
 from API.Schemas import BaseSchema
 from API.Schemas.Mordhau.Game.set import SetInDB
@@ -58,6 +59,7 @@ class Set(BaseEndpoint):
     @staticmethod
     @route.post("/create-set", tags=tags, response_model=BaseSchema)
     async def create_set(map_name: str, match_id: UUID4, auth=Depends(JWTBearer())):
+        await check_user(token=auth[0], user_id=auth[-1])
         set_id = await create_set(CreateSet(match_id=match_id, map=map_name))
         log.info(f"User \"{auth[-1]}\" created a set \"{set_id}\" under match \"{match_id}\"")
         return BaseSchema(

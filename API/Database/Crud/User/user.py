@@ -93,6 +93,8 @@ async def check_user(token=None, user_id: str = None, user: SchemaUserInDBExtra 
             user = await get_user_by_id(user_id)
             if user.is_active:
                 return user
+            else:
+                raise HTTPException(status_code=403)
         except HTTPException:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
