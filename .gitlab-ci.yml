@@ -104,9 +104,9 @@ Initialization:
         - python -m pip install psycopg2-binary
             || python -m pip install psycopg2
 
-        - touch Database/.env
-        - mdkir -p ./Artifact
-        - python setup.py build
+        - touch Database/.env   || true
+        - mdkir -p ./Artifact   || true
+        - python setup.py build || true
 
 Compile (Dry):
     stage: UAT
