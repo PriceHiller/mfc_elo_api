@@ -6,7 +6,7 @@ from bcrypt import gensalt
 from bcrypt import checkpw
 from fastapi.security import APIKeyCookie
 
-from API.auth import jwt
+from API.Auth import jwt
 
 JWTBearer = jwt.JWTBearer
 

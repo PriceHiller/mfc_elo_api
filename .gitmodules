@@ -1,3 +1,6 @@
 [submodule "/Users/io/MFC-ELO/.Source/Mordhau-Statistics-Tracker"]
 	path = /Users/io/MFC-ELO/.Source/Mordhau-Statistics-Tracker
 	url = https://github.com/amorijs/mordhau-stat-tracker
+[submodule ".Source/IO"]
+	path = .Source/IO
+	url = https://gitlab.cloud-technology.io/CI-CD/IO.git

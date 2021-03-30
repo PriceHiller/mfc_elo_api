@@ -1,7 +1,8 @@
 from fastapi import APIRouter
-from fastapi.responses import UJSONResponse
 
 from API.Endpoints import BaseEndpoint
+
+from API.Schemas import BaseSchema
 
 
 class Status(BaseEndpoint):
@@ -12,6 +13,6 @@ class Status(BaseEndpoint):
     route = APIRouter()
 
     @staticmethod
-    @route.get("/status", response_class=UJSONResponse, tags=tags)
+    @route.get("/status", tags=tags)
     async def _status():
-        return {"Status": Status.status}
+        return BaseSchema(message=Status.status)

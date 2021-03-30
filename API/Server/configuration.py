@@ -12,4 +12,11 @@ class UvicornConfiguration(uvicorn.config.Config):
                  reload: bool = True,
                  *args,
                  **kwargs):
-        super().__init__(app, host=host, port=port, log_config=log_config, reload=reload, *args, **kwargs)
+        super().__init__(
+            app,
+            host=host,
+            port=port,
+            log_config=log_config,
+            reload=reload,
+            *args,
+            **kwargs)

@@ -1,0 +1,151 @@
+# ========================================================================
+# CI-CD Pipeline - MFC Statistics
+# ========================================================================
+
+stages: [
+    "Setup", "Testing", "Unit", "Initialization", "Code-Quality",
+    "Analysis", "Reporting", "Package", "Distribution", "Export",
+    "Release", "Version"
+]
+
+workflow: { rules: [
+    {
+        if: "$CI_PIPELINE_SOURCE == 'merge_request_event'",
+        when: "always"
+    }, {
+        if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH",
+        when: "always"
+    }, {
+        if: "$CI_COMMIT_TAG",
+        when: "never"
+    }
+]}
+
+include: [
+    { local: "IO-Git-Leaks.Yaml"                    }, # Stage --> Analysis
+    { local: "IO-Code-Quality.Yaml"                 }, # Stage --> Analysis
+    { local: "IO-Secrets-Detection.Yaml"            }, # Stage --> Analysis
+
+    { local: "IO-Pre-Release.Yaml"                  }, # Stage --> Pre-Release
+    { local: "IO-Release.Yaml"                      }  # Stage --> Release
+]
+
+default: { image: { name: "python:alpine" } }
+
+# ------------------------------------------------------------------------
+# Setup & Utility Callables
+# ------------------------------------------------------------------------
+
+.Alpine: &Alpine [ "apk add --quiet bash curl git git-lfs jq" ]
+
+.Bionic: &Bionic [ "sudo apt install curl jq --yes" ]
+
+.GCC: &GCC [ "apk add --quiet libc-dev linux-headers build-base" ]
+
+.Sphinx: &Sphinx [ "python3 -m pip --quiet install Sphinx" ]
+
+# ------------------------------------------------------------------------
+# Python Pre-Scripts, Configuration
+# ------------------------------------------------------------------------
+
+.Python: &Python-3
+    - python3 -m pip install --upgrade pip
+    - python3 -m pip install setuptools
+    - python3 -m pip  install wheel
+    - python3 -m pip --quiet install virtualenv
+    - python3 -m virtualenv --quiet .venv
+    - mkdir -p .cache/pip && source .venv/bin/activate
+    - python -m pip --quiet install --upgrade pip
+
+# - - - - - - - - - - - - - - -
+# Regular Expression Triggers
+# - - - - - - - - - - - - - - -
+
+.User-Acceptance-Testing: &UAT-Trigger
+    -   if:     $CI_COMMIT_MESSAGE =~ /^(\[!UAT\]|\[!Unit-Testing\]|\[!Dry-Run\]|\[User-Acceptance-Testing\]).*/imU
+        when:   "never"
+    -   when:   "manual"
+
+.Pipeline: &Trigger { rules: [
+    {
+        if: "$CI_PIPELINE_SOURCE == 'merge_request_event'",
+        when: "always"
+    }, {
+        if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH",
+        when: "always"
+    }, {
+        if: "$CI_COMMIT_TAG",
+        when: "never"
+    }
+] }
+
+# ------------------------------------------------------------------------
+# Pipeline Entry Point
+# ------------------------------------------------------------------------
+
+# - - - - - - - - -
+# Executable Jobs
+# - - - - - - - - -
+
+Initialization:
+    stage: Setup
+    artifacts: { paths: [ "Artifact" ], expire_in: "1 hour" }
+    before_script: [ *GCC, *Python-3, *Alpine ]
+    allow_failure: False
+    script:
+        - Auxiliary "Installing Dependencies"
+
+        - apk --no-cache add build-base
+        - apk --no-cache add py3-cffi
+        - apk --no-cache add libffi-dev
+        - apk --no-cache add openssl-dev
+        - apk --no-cache add postgresql-dev
+        - apk --no-cache add py3-psycopg2
+        - apk --no-cache add cargo
+
+        - python -m pip install psycopg2-binary
+            || python -m pip install psycopg2
+
+        - Auxiliary "Building Artifacts & Source"
+
+        - touch Database/.env
+        - mdkir -p ./Artifact
+        - python setup.py build
+
+Compile (Dry):
+    stage: UAT
+    rules: *UAT-Trigger
+    needs: [ { job: Initialization, artifacts: True } ]
+    allow_failure: True
+    before_script: [ *GCC, *Python-3, *Alpine ]
+    script:
+        - python setup.py build --dry-run
+
+Archive (Dry):
+    stage: UAT
+    rules: *UAT-Trigger
+    needs: [ { job: Initialization, artifacts: True } ]
+    allow_failure: True
+    before_script: [ *GCC, *Python-3, *Alpine ]
+    script:
+        - python setup.py sdist --dry-run
+
+Install (Dry):
+    stage: UAT
+    rules: *UAT-Trigger
+    needs:  [ { job: Initialization, artifacts: True } ]
+    variables: { GIT_STRATEGY: "clone" }
+    allow_failure: True
+    before_script: [ *GCC, *Python-3, *Alpine ]
+    script:
+        - python setup.py install --dry-run
+
+Compile:
+    stage: Package
+    needs: [ { job: Initialization, artifacts: True } ]
+    artifacts: { paths: [ "Artifact/Distribution" ] }
+    before_script: [ *GCC, *Python-3, *Alpine ]
+    resource_group: Distributable
+    script:
+        - Auxiliary "Setting Wheel Variables"
+        - python setup.py sdist bdist_wheel
