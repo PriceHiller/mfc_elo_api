@@ -9,6 +9,8 @@ import pkgutil
 
 import fastapi
 
+from distutils.util import strtobool
+
 from starlette.config import Config
 
 from fastapi.staticfiles import StaticFiles
@@ -99,36 +101,19 @@ class BaseApplication:
         BaseEndpoint.load_endpoints()
         ModelBase.load_models()
 
-        instance_config = vars(cls().uvicorn_config)
-        type_error = True
+        instance_config = dynamic_env_load(cls().uvicorn_config, "uvicorn_", UvicornConfiguration)
 
-        base_match = "uvicorn_"
-        while type_error:
-            try:
-                for var in instance_config.keys():
-                    if env_var := config.get(base_match + var, default=None):
-                        if str(env_var).isnumeric():
-                            instance_config[var] = int(env_var)
-                        elif str(env_var).casefold() == "false":
-                            instance_config[var] = False
-                        elif str(env_var).casefold() == "true":
-                            instance_config[var] = True
-                        elif "[" in str(env_var)[0] and "]" in str(env_var)[-1]:
-                            instance_config[env_var] = str(env_var).strip("[").strip("]").split(",")
-                        UvicornConfiguration(**instance_config)
-                type_error = False
-            except TypeError as error:
-                error_attr = str(error).split(" ")[-1].strip("'")
-                print(instance_config)
-                instance_config.pop(error_attr)
         instance_config["loop"] = "uvloop"
+
+
         # Finished setup, run it
         uvloop.install()
         asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
         loop = asyncio.new_event_loop()
 
-        loop.run_until_complete(asyncio.wait([loop.create_task(cls(UvicornConfiguration(**instance_config)).serve(sockets=kwargs.get("sockets")))]))
+        loop.run_until_complete(asyncio.wait(
+            [loop.create_task(cls(UvicornConfiguration(**instance_config)).serve(sockets=kwargs.get("sockets")))]))
 
         # To define more asynchronous applications to be ran that can be done via
         # loop.create_task(YOUR_APPLICATION) pior to loop.run_until_complete
@@ -149,6 +134,37 @@ def find_subclasses(package: str = "API", recursive: bool = True) -> None:
         importlib.import_module(full_name)
         if recursive and is_pkg:
             find_subclasses(full_name, recursive)
+
+
+def dynamic_env_load(instance: object, base_match: str, uninstantiated_object) -> dict:
+    """
+    Will load environment variables based on the arguments that are passed to an object.
+    The arguments are found via instance_vars which should be passed in via vars(object()).
+    """
+
+    instance_vars = vars(instance)
+    for var in dict(instance_vars).keys():
+        if env_var := config.get(base_match + var, default=None):
+            try:
+                instance_vars[var] = strtobool(str(env_var).casefold())
+                continue
+            except ValueError:
+                pass
+            if str(env_var).isnumeric():
+                instance_vars[var] = int(env_var)
+            elif str(env_var).casefold() == "none":
+                instance_vars[var] = None
+            elif "[" in str(env_var)[0] and "]" in str(env_var)[-1]:
+                instance_vars[var] = str(env_var).strip("[").strip("]").split(",")
+            else:
+                instance_vars[var] = str(env_var)
+        try:
+            uninstantiated_object(**instance_vars)
+        except TypeError as error:
+            error_attr = str(error).split(" ")[-1].strip("'")
+            instance_vars.pop(error_attr)
+
+    return instance_vars
 
 
 __all__ = [

@@ -1,0 +1,110 @@
+#!/usr/bin/env file .
+
+# -*-  Coding: UTF-8  -*- #
+# -*-  System: Linux  -*- #
+# -*-  Usage:  *.Yaml -*- #
+
+# Owner: Jacob B. Sanders
+# Source: code.cloud-technology.io
+# License: BSD 2-Clause License
+
+#
+# Copyright 2020 Jacob B. Sanders - Cloud Hybrid LLC. & Affiliates
+#
+# Redistribution and use in source and binary forms, with or without modification, are permitted
+# provided that the following conditions are met:
+#
+# 1.  Redistributions of source code must retain the above copyright notice, this list of
+#     conditions and the following disclaimer.
+#
+# 2.  Redistributions in binary form must reproduce the above copyright notice, this list of
+#     conditions and the following disclaimer in the documentation and/or other materials
+#     provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS
+# OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+# AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER
+# OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+# OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
+# OF SUCH DAMAGE.
+#
+
+---
+
+#
+# ========================================================================
+# --> Pipeline: Continuous Integration & Deployment Configuration(s)
+# ========================================================================
+#
+
+# ------------------------------------------------------------------------
+# YAML Configuration Anchors
+# ------------------------------------------------------------------------
+
+.Job: &Pre-Execution [ "apk add curl" ]
+
+.Job: &Image "registry.gitlab.com/gitlab-org/release-cli:latest"
+
+.Job: &Stage "Release"
+
+.Job: &Trigger [
+    {
+        if: "$CI_PIPELINE_SOURCE == 'merge_request_event'",
+        changes: [ "VERSION" ],
+        when: "always"
+    }, {
+        if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH",
+        changes: [ "VERSION" ],
+        when: "always"
+    }, {
+        if: "$CI_COMMIT_TAG",
+        when: "never"
+    }
+]
+
+.Job: &Dependencies [
+    { job: "Version", artifacts: True }
+]
+
+.Job: &Variables { GIT_STRATEGY: "recursive" }
+
+.Job: &Artifacts {
+    paths: [ "*", "**", "*/**" ],
+    expire_in: "1 week",
+    untracked: True,
+    exclude: [ ".git/" ]
+}
+
+.Job: &Settings {
+    ref: "$CICD_COMMIT",
+    name: "$CICD_NAME - $CICD_VERSION - $CICD_BRANCH",
+    tag_name: "$CICD_VERSION",
+    description: "**Automated Release Generation**"
+}
+
+.Job: &Script [
+    "echo ..."
+]
+
+.Job: &Failure-Allowance True
+
+# ------------------------------------------------------------------------
+# Primary Entry-Point (Jobs + Stages + Triggers)
+# ------------------------------------------------------------------------
+
+Evidence:
+    image:          *Image
+    rules:          *Trigger
+    stage:          *Stage
+    needs:          *Dependencies
+    script:         *Script
+    release:        *Settings
+    artifacts:      *Artifacts
+    variables:      *Variables
+    before_script:  *Pre-Execution
+    allow_failure:  *Failure-Allowance
+
+stages: [ *Stage ]

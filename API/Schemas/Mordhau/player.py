@@ -1,14 +1,14 @@
 from typing import Optional
 from typing import Union
 
-from pydantic import BaseModel
 from pydantic import Field
 from pydantic import UUID4
 
 from API.Schemas import BaseInDB
+from API.Schemas import BaseSchema
 
 
-class BasePlayer(BaseModel):
+class BasePlayer(BaseSchema):
     player_name: str
     playfab_id: str
     discord_id: Optional[int]

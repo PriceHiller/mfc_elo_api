@@ -22,6 +22,8 @@ from API.Database.Crud.Mordhau.team import update_elo
 from API.Endpoints import BaseEndpoint
 
 from API.Schemas.Mordhau.team import Team
+from API.Schemas.Mordhau.team import TeamInDB
+from API.Schemas import BaseSchema
 
 log = logging.getLogger(__name__)
 
@@ -32,12 +34,12 @@ class MordhauTeam(BaseEndpoint):
     route = APIRouter(prefix="/team")
 
     @staticmethod
-    @route.get("/all", tags=tags)
+    @route.get("/all", tags=tags, response_model=list[TeamInDB])
     async def team():
         return await get_teams()
 
     @staticmethod
-    @route.get("/id", tags=tags)
+    @route.get("/id", tags=tags, response_model=TeamInDB)
     async def _id(id: str) -> [Team]:
         if team := await get_team_by_id(id):
             return team
@@ -47,7 +49,7 @@ class MordhauTeam(BaseEndpoint):
         )
 
     @staticmethod
-    @route.get("/name", tags=tags)
+    @route.get("/name", tags=tags, response_model=TeamInDB)
     async def name(team_name: str):
         if team := await get_team_by_name(team_name):
             return team
@@ -57,7 +59,7 @@ class MordhauTeam(BaseEndpoint):
         )
 
     @staticmethod
-    @route.post("/name", tags=tags)
+    @route.post("/name", tags=tags, response_model=TeamInDB)
     async def update_name(new_name: str,
                           team_id: str = Query(..., min_length=32, max_length=36),
                           auth=Depends(JWTBearer())):
@@ -75,15 +77,16 @@ class MordhauTeam(BaseEndpoint):
         return {"Team ID": await create_team(team)}
 
     @staticmethod
-    @route.post("/delete", tags=tags)
+    @route.post("/delete", tags=tags, response_model=BaseSchema)
     async def delete(team_id: str = Query(..., min_length=32, max_length=36), auth=Depends(JWTBearer())):
         await check_user(token=auth[0], user_id=auth[-1])
         if team_id and await get_team_by_id(team_id):
             log.info(f"User id \"{auth[-1]}\" issued a delete of Mordhau Team id \"{team_id}\"")
             await delete_team(team_id)
+            return BaseSchema(message=f"Team {team_id} deleted")
 
     @staticmethod
-    @route.post("/update-elo", tags=tags)
+    @route.post("/update-elo", tags=tags, response_model=TeamInDB)
     async def update_elo(new_elo: int,
                          team_id: str = Query(..., min_length=32, max_length=36),
                          auth=Depends(JWTBearer())):
@@ -93,13 +96,13 @@ class MordhauTeam(BaseEndpoint):
             return await update_elo(team_id, new_elo)
 
     @staticmethod
-    @route.post("/add-player-to-team", tags=tags)
+    @route.post("/add-player-to-team", tags=tags, response_model=TeamInDB)
     async def add_player_to_team(player_id, team_id, auth=Depends(JWTBearer())):
         await check_user(token=auth[0], user_id=auth[-1])
         return await add_player_to_team(player_id, team_id)
 
     @staticmethod
-    @route.post("/remove-player-from-team", tags=tags)
+    @route.post("/remove-player-from-team", tags=tags, response_model=TeamInDB)
     async def remove_player_from_team(player_id, team_id, auth=Depends(JWTBearer())):
         await check_user(token=auth[0], user_id=auth[-1])
         return await remove_player_from_team(player_id, team_id)

@@ -52,7 +52,7 @@ async def create_token(user: SchemaUserInDB) -> str:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Token already exists")
 
 
-async def get_token_by_id(token_id, fetch_one=False) -> SchemaTokenInDB:
+async def get_token_by_id(token_id, fetch_one=True) -> SchemaTokenInDB:
     token_id = str(token_id)
     if len(token_id) < 32 or len(token_id) > 36:
         raise HTTPException(

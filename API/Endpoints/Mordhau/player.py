@@ -37,7 +37,7 @@ class MordhauPlayer(BaseEndpoint):
         return await get_players()
 
     @staticmethod
-    @route.get("/id", tags=tags)
+    @route.get("/id", tags=tags, response_model=PlayerInDB)
     async def _id(id: str) -> [Player, dict]:
         if player := await get_player_by_id(id):
             return player
@@ -47,7 +47,7 @@ class MordhauPlayer(BaseEndpoint):
         )
 
     @staticmethod
-    @route.get("/name", tags=tags)
+    @route.get("/name", tags=tags, response_model=PlayerInDB)
     async def name(player_name: str) -> PlayerInDB:
         if player := await get_player_by_name(player_name):
             return player
@@ -78,7 +78,8 @@ class MordhauPlayer(BaseEndpoint):
 
     @staticmethod
     @route.post("/update-discord-id", tags=tags)
-    async def update_discord_id(discord_id: int = Query(..., min_length=17),
+    async def update_discord_id(discord_id: int = Query(..., gt=9999999999999999),
+                                # That defines the minimum value for a discord id
                                 player_id: str = Query(..., min_length=32, max_length=36),
                                 auth=Depends((JWTBearer()))):
         await check_user(token=auth[0], user_id=auth[-1])

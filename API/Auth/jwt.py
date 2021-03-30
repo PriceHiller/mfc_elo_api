@@ -13,15 +13,17 @@ from fastapi import HTTPException
 
 from fastapi.security import HTTPBearer
 
+from API import config
+
 log = logging.getLogger(__name__)
 
 
 class JWTBearer(HTTPBearer):
-    JWT_SECRET = os.getenv("jwt_secret").strip()
+    JWT_SECRET = config.get("jwt_secret")
     if not JWT_SECRET:
         raise AttributeError(f"JWT_SECRET does not have an environment variable: \"jwt_secret\"")
 
-    JWT_ALGORITHM = os.getenv("jwt_algorithm")
+    JWT_ALGORITHM = config.get("jwt_algorithm")
     if not JWT_ALGORITHM:
         raise AttributeError(f"JWT_ALGORITHM does not have an environment variable: \"jwt_algorithm\"")
 

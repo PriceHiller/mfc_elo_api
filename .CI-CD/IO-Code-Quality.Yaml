@@ -1,0 +1,123 @@
+#!/usr/bin/env file .
+
+# -*-  Coding: UTF-8  -*- #
+# -*-  System: Linux  -*- #
+# -*-  Usage:  *.Yaml -*- #
+
+# Owner:    Jacob B. Sanders
+# Source:   code.cloud-technology.io
+# License:  BSD 2-Clause License
+
+#
+# Copyright 2020 Jacob B. Sanders - Cloud Hybrid LLC. & Affiliates
+#
+# Redistribution and use in source and binary forms, with or without modification, are permitted
+# provided that the following conditions are met:
+#
+# 1.  Redistributions of source code must retain the above copyright notice, this list of
+#     conditions and the following disclaimer.
+#
+# 2.  Redistributions in binary form must reproduce the above copyright notice, this list of
+#     conditions and the following disclaimer in the documentation and/or other materials
+#     provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS
+# OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+# AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER
+# OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+# OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
+# OF SUCH DAMAGE.
+#
+
+---
+
+#
+# ========================================================================
+# --> Pipeline: Continuous Integration & Deployment Configuration(s)
+# ========================================================================
+# - https://gitlab.com/gitlab-org/ci-cd/codequality
+#
+# Upon Error(s), Check Docker Socket Binding
+# - ./Virtualization/Containers/Code-Quality/Git-Runner.Configuration.TOML
+#
+
+# ------------------------------------------------------------------------
+# YAML Configuration Anchors
+# ------------------------------------------------------------------------
+
+.Job: &Stage "Analysis"
+
+.Job: &Runner [ "Cloud-Technology" ]
+
+.Job: &Failure-Allowance True
+
+.Job: &Image "docker:stable"
+
+.Job: &Service [ "docker:stable-dind" ]
+
+.Job: &Pre-Execution [ "apk add bash curl git jq" ]
+
+.Job: &Trigger [
+    {
+        if: "$CI_PIPELINE_SOURCE == 'merge_request_event'",
+        changes: [ "IO-Code-Quality.Yaml" ],
+        when: "always"
+    }, {
+        if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH",
+        when: "always"
+    }, {
+        if: "$CODE_QUALITY_DISABLED || $CI_COMMIT_TAG",
+        when: "never"
+    }
+]
+
+.Job: &Artifacts { reports: { codequality: "Code-Quality.html" }, paths: [ "Code-Quality.html" ] }
+
+.Job: &Dependencies []
+
+.Job: &Variables
+    REPORT_FORMAT:      "html"
+    DOCKER_DRIVER:      "overlay2"
+    GIT_STRATEGY:       "recursive"
+    DOCKER_TLS_CERTDIR: ""
+    ENGINE_MEMORY_LIMIT_BYTES: "8192000000"
+    TIMEOUT_SECONDS:    "900"
+    VERSION:            "0.85.22"
+    REPORT_STDOUT:      "1"
+
+.Job: &Cache {}
+
+.Job: &Script
+    - cd "${CI_PROJECT_DIR}"
+    - docker run
+        --env SOURCE_CODE="${CI_PROJECT_DIR}"
+        --env REPORT_FORMAT="${REPORT_FORMAT:-json}"
+        --env TIMEOUT_SECONDS="${TIMEOUT_SECONDS:-900}"
+        --env ENGINE_MEMORY_LIMIT_BYTES="${ENGINE_MEMORY_LIMIT_BYTES:-1024000000}"
+        --env REPORT_STDOUT="1"
+        --volume "${CI_PROJECT_DIR}":/Code-Quality
+        --volume /var/run/docker.sock:/var/run/docker.sock
+        registry.gitlab.com/gitlab-org/ci-cd/codequality:${VERSION:-latest}
+        /Code-Quality > "${CI_PROJECT_DIR}/Code-Quality.${REPORT_FORMAT:-json}"
+
+# ------------------------------------------------------------------------
+# Primary Entry-Point (Jobs + Stages + Triggers)
+# ------------------------------------------------------------------------
+
+Quality (Report):
+    cache:          *Cache
+    image:          *Image
+    rules:          *Trigger
+    stage:          *Stage
+    needs:          *Dependencies
+    script:         *Script
+    services:       *Service
+    artifacts:      *Artifacts
+    variables:      *Variables
+    before_script:  *Pre-Execution
+    allow_failure:  *Failure-Allowance
+
+stages: [ *Stage ]

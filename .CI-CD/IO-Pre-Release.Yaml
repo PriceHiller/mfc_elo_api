@@ -1,0 +1,159 @@
+#!/usr/bin/env file .
+
+# -*-  Coding: UTF-8  -*- #
+# -*-  System: Linux  -*- #
+# -*-  Usage:  *.Yaml -*- #
+
+# Owner:    Jacob B. Sanders
+# Source:   code.cloud-technology.io
+# License:  BSD 2-Clause License
+
+#
+# Copyright 2020 Jacob B. Sanders - Cloud Hybrid LLC. & Affiliates
+#
+# Redistribution and use in source and binary forms, with or without modification, are permitted
+# provided that the following conditions are met:
+#
+# 1.  Redistributions of source code must retain the above copyright notice, this list of
+#     conditions and the following disclaimer.
+#
+# 2.  Redistributions in binary form must reproduce the above copyright notice, this list of
+#     conditions and the following disclaimer in the documentation and/or other materials
+#     provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS
+# OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+# AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER
+# OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+# OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
+# OF SUCH DAMAGE.
+#
+
+---
+
+#
+# ========================================================================
+# --> Pipeline: Continuous Integration & Deployment Configuration(s)
+# ========================================================================
+#
+
+# ------------------------------------------------------------------------
+# YAML Configuration Anchors
+# ------------------------------------------------------------------------
+
+.Job: &Pre-Execution [ "apk add bash curl git jq" ]
+
+.Job: &Stage "Export"
+
+.Job: &Artifacts { reports: { dotenv: ".env" }, paths: [ ".env" ] }
+
+.Job: &Trigger [
+    {
+        if: "$CI_PIPELINE_SOURCE == 'merge_request_event'",
+        changes: [ "VERSION" ],
+        when: "always"
+    }, {
+        if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH",
+        changes: [ "VERSION" ],
+        when: "always"
+    }, {
+        if: "$CI_PIPELINE_SOURCE == 'push'",
+        changes: [ "VERSION" ],
+        when: "always"
+    }, {
+        if: "$CI_COMMIT_TAG",
+        when: "never"
+    }
+]
+
+.Job: &Script |
+    cat << 'EOF' > Pre-Release.Bash
+    export CWD="$( cd "$(dirname "${0}" )" > /dev/null 2>&1 ; pwd -P )"
+
+    export ENV="${CWD}/.env"
+
+    rm -f "${ENV}"
+
+    printf "%s\n" "CICD_PATH=${CWD}" >> "${ENV}" \
+        && echo -e "\n\t PATH ➜ \"${CWD}\"\n"
+
+    [[ "${CI_PROJECT_TITLE}" != "" ]] && export NAME="${CI_PROJECT_TITLE}"
+    [[ "${NAME}" == "" ]] && \
+        export NAME="$(basename "$(git rev-parse --show-toplevel)")"
+
+    [[ "${CI_COMMIT_TIMESTAMP}" != "" ]] && export TIMESTAMP="${CI_COMMIT_TIMESTAMP}"
+    [[ "${TIMESTAMP}" == "" ]] && \
+        export TIMESTAMP="$(date +"%s")"
+
+    [[ "${CI_COMMIT_SHA}" != "" ]] && export COMMIT="${CI_COMMIT_SHA}"
+    [[ "${COMMIT}" == "" ]] && \
+        export COMMIT="$(git rev-parse HEAD)"
+
+    [[ "${CI_COMMIT_BRANCH}" != "" ]] && export BRANCH="${CI_COMMIT_BRANCH}"
+    [[ "${BRANCH}" == "" ]] && \
+        export BRANCH="$(git branch --show-current)"
+
+    [[ "${CI_PROJECT_URL}" != "" ]] && export URL="${CI_PROJECT_URL}"
+    [[ "${URL}" == "" ]] && \
+        export URL="$(git remote -v | head -n1 | awk '{print $2}' \
+            | sed -e 's,.*:\(.*/\)\?,,' -e 's/\.git$//')"
+
+    export V=$(cat "${CWD}/VERSION") && export VERSION=( ${V//./ } )
+
+    (( PATCH = ${VERSION[2]} )) || true
+
+    export VERSION="${VERSION[0]}.${VERSION[1]}.${PATCH}"
+
+    printf "%s" "${VERSION}" > "${CWD}/VERSION"
+
+    export V=$(cat "${CWD}/VERSION") && export VERSION=( ${V//./ } )
+
+    printf "%s\n" "CICD_VERSION=${V}" >> "${ENV}" \
+        && echo -e "\n\t VERSION ➜ \"${V}\"\n"
+
+    printf "%s\n" "CICD_MAJOR=${VERSION[0]}" >> "${ENV}" \
+        && echo -e "\n\t\t MAJOR ➜ \"${VERSION[0]}\"\n"
+
+    printf "%s\n" "CICD_MINOR=${VERSION[1]}" >> "${ENV}" \
+        && echo -e "\n\t\t MINOR ➜ \"${VERSION[1]}\"\n"
+
+    printf "%s\n" "CICD_PATCH=${VERSION[2]}" >> "${ENV}" \
+        && echo -e "\n\t\t PATCH ➜ \"${VERSION[2]}\"\n"
+
+    printf "%s\n" "CICD_NAME=${NAME}" >> "${ENV}" \
+        && echo -e "\n\t NAME ➜ \"${NAME}\"\n"
+
+    printf "%s\n" "CICD_TIMESTAMP=${TIMESTAMP}" >> "${ENV}" \
+        && echo -e "\n\t TIMESTAMP ➜ \"${TIMESTAMP}\"\n"
+
+    printf "%s\n" "CICD_COMMIT=${COMMIT}" >> "${ENV}" \
+        && echo -e "\n\t COMMIT ➜ \"${COMMIT}\"\n"
+
+    printf "%s\n" "CICD_BRANCH=${BRANCH}" >> "${ENV}" \
+        && echo -e "\n\t BRANCH ➜ \"${BRANCH}\"\n"
+
+    printf "%s\n" "CICD_URL=${URL}" >> "${ENV}" \
+        && echo -e "\n\t URL ➜ \"${URL}\"\n"
+
+    echo "Complete" && exit 0
+    EOF
+
+.Job: &Failure-Allowance True
+
+# ------------------------------------------------------------------------
+# Primary Entry-Point (Jobs + Stages + Triggers)
+# ------------------------------------------------------------------------
+
+Version:
+    rules:          *Trigger
+    stage:          *Stage
+    artifacts:      *Artifacts
+    before_script:  *Pre-Execution
+    allow_failure:  *Failure-Allowance
+
+    script:         [ *Script, "bash Pre-Release.Bash" ]
+
+stages: [ *Stage ]

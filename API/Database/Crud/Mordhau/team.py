@@ -39,11 +39,11 @@ async def create_team(team: SchemaTeam):
 
 
 async def delete_team(team_id):
-    query = ModelTeam.__table__.delete().select(
-        team_id=team_id
+    query = ModelTeam.__table__.delete().where(
+        ModelTeam.id == team_id
     )
 
-    return await db.execute(query)
+    await db.execute(query)
 
 
 async def get_teams() -> list[SchemaTeamInDB]:

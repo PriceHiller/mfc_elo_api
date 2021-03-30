@@ -6,11 +6,12 @@ from pydantic import Field
 from pydantic import EmailStr
 
 from API.Schemas import BaseInDB
+from API.Schemas import BaseSchema
 
 from .token import TokenInDB
 
 
-class BaseUser(BaseModel):
+class BaseUser(BaseSchema):
     username: str = Field(min_length=3,
                           max_length=36)
 

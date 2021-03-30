@@ -1,0 +1,29 @@
+stages: [ "Setup", "Testing", "Unit", "Initialization", "Code-Quality", "Analysis", "Reporting", "Package", "Distribution", "Export", "Release", "Version" ]
+
+workflow: { rules: [
+    {
+        if: "$CI_PIPELINE_SOURCE == 'merge_request_event'",
+        when: "always"
+    }, {
+        if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH",
+        when: "always"
+    }, {
+        if: "$CI_COMMIT_TAG",
+        when: "never"
+    }
+]}
+
+include: [
+    { local: "IO-Code-Quality-Unit-Test.Yaml"       }, # Stage --> Setup
+
+    { local: "IO-Git-Leaks.Yaml"                    }, # Stage --> Analysis
+    { local: "IO-Code-Quality.Yaml"                 }, # Stage --> Analysis
+    { local: "IO-Secrets-Detection.Yaml"            }, # Stage --> Analysis
+
+    { local: "IO-Code-Quality-Distribution.Yaml"    }, # Stage --> Distribution
+    { local: "IO-Pre-Release.Yaml"                  }, # Stage --> Pre-Release
+    { local: "IO-Release.Yaml"                      }  # Stage --> Release
+]
+
+default: { image: { name: "python:alpine" } }
+

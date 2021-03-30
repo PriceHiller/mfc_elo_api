@@ -1,0 +1,106 @@
+#!/usr/bin/env file .
+
+# -*-  Coding: UTF-8  -*- #
+# -*-  System: Linux  -*- #
+# -*-  Usage:  *.Yaml -*- #
+
+# Owner:    Jacob B. Sanders
+# Source:   code.cloud-technology.io
+# License:  BSD 2-Clause License
+
+#
+# Copyright 2020 Jacob B. Sanders - Cloud Hybrid LLC. & Affiliates
+#
+# Redistribution and use in source and binary forms, with or without modification, are permitted
+# provided that the following conditions are met:
+#
+# 1.  Redistributions of source code must retain the above copyright notice, this list of
+#     conditions and the following disclaimer.
+#
+# 2.  Redistributions in binary form must reproduce the above copyright notice, this list of
+#     conditions and the following disclaimer in the documentation and/or other materials
+#     provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS
+# OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+# AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER
+# OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+# OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
+# OF SUCH DAMAGE.
+#
+
+---
+
+#
+# ========================================================================
+# --> Pipeline: Continuous Integration & Deployment Configuration(s)
+# ========================================================================
+# - https://gitlab.com/gitlab-org/ci-cd/codequality
+#
+
+# ------------------------------------------------------------------------
+# YAML Configuration Anchors
+# ------------------------------------------------------------------------
+
+.Job: &Stage "Analysis"
+
+.Job: &Runner [ "Python", "Docker", "Alpine" ]
+
+.Job: &Cache {}
+
+.Job: &Image { name: "zricethezav/gitleaks", entrypoint: [ "" ] }
+
+.Job: &Service [ "docker:dind" ]
+
+.Job: &Pre-Execution [ "apk add bash curl git jq" ]
+
+.Job: &Failure-Allowance True
+
+.Job: &Trigger
+    -   if:     $CI_COMMIT_MESSAGE =~ "/^(Secrets-Detection|Analysis|Audit|Git-Leaks)?(-|:)?($)?(.*)/imU"
+    -   if:     $CI_PIPELINE_SOURCE == "merge_request_event" # Merge Request Pipelines
+    -   if:     $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH      # Master Branch
+    -   if:     $CI_COMMIT_TAG                               # Tags
+        when:   "never"
+
+.Job: &Artifacts {
+    paths: ["Git-Leaks.json"]
+}
+
+.Job: &Dependencies []
+
+.Job: &Variables
+    DOCKER_DRIVER:              "overlay2"
+    GIT_STRATEGY:               "recursive"
+    DOCKER_TLS_CERTDIR:         ""
+    ENGINE_MEMORY_LIMIT_BYTES: "4096000000"
+    TIMEOUT_SECONDS:            "900"
+    SOURCECODE:                 "${CI_PROJECT_DIR}"
+
+.Job: &Script
+    - gitleaks --report "Git-Leaks.json"
+          --path "${CI_PROJECT_DIR:-${CWD}}"
+              --format "json"
+                  --verbose \
+      || true
+
+# ------------------------------------------------------------------------
+# Primary Entry-Point (Jobs + Stages + Triggers)
+# ------------------------------------------------------------------------
+
+Git-Leaks:
+    image:          *Image
+    rules:          *Trigger
+    stage:          *Stage
+    needs:          *Dependencies
+    script:         *Script
+    services:       *Service
+    artifacts:      *Artifacts
+    variables:      *Variables
+    before_script:  *Pre-Execution
+    allow_failure:  *Failure-Allowance
+
+stages: [ *Stage ]

@@ -9,6 +9,7 @@ from pydantic import UUID4
 
 from API.Endpoints import BaseEndpoint
 
+from API.Schemas import BaseSchema
 from API.Schemas.User.user import UserCreate
 from API.Schemas.User.user import UserInDBExtra
 
@@ -32,11 +33,14 @@ class User(BaseEndpoint):
     tags = ["user"]
 
     @staticmethod
-    @route.post("/signup", tags=tags, response_model=dict[str, str])
-    async def create_user(user: UserCreate) -> dict[str, str]:
+    @route.post("/signup", tags=tags, response_model=BaseSchema)
+    async def create_user(user: UserCreate) -> BaseSchema:
         user_id = str(await create_user(user=user))
         log.info(f"The user \"{user.username}\" was created with id \"{user_id}\"")
-        return {"User ID": user_id}
+        return BaseSchema(
+            message="User Successfully Created",
+            extra=[{"User ID": user_id}]
+        )
 
     @staticmethod
     @route.post("/login", tags=tags, response_model=UserInDBExtra)
@@ -84,13 +88,13 @@ class User(BaseEndpoint):
             )
 
     @staticmethod
-    @route.post("/revoke_token", tags=tags, response_model=dict[str, bool])
+    @route.post("/revoke_token", tags=tags, response_model=BaseSchema)
     async def revoke_token(token_id: UUID4, auth=Depends(JWTBearer())):
         await check_user(token=auth[0], user_id=auth[-1])
         if token := await get_token_by_id(token_id, fetch_one=True):
             log.info(f"User \"{auth[-1]}\" revoked a token \"{token_id}\"")
             await delete_token(token.id)
-            return {"Success": True}
+            return BaseSchema(message="Success")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Token with id {token_id} was not found"
