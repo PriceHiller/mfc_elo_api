@@ -22,7 +22,7 @@ Change your timezone in `postgresql.conf` to `UTC`.
 #### Locations
 `postgresql.conf` on M1 Mac is located at `/Users/user/Library/Application Support/Postgres/var-13`
 
-#Environment Variables
+# Environment Variables
 
 ## JWT Variables
 
