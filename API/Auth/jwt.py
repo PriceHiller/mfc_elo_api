@@ -1,4 +1,3 @@
-import os
 import logging
 
 from datetime import datetime
@@ -10,6 +9,7 @@ from jose import jwt
 from fastapi import Request
 from fastapi import Response
 from fastapi import HTTPException
+from starlette.datastructures import Secret
 
 from fastapi.security import HTTPBearer
 
@@ -19,11 +19,11 @@ log = logging.getLogger(__name__)
 
 
 class JWTBearer(HTTPBearer):
-    JWT_SECRET = config.get("jwt_secret")
+    JWT_SECRET = Secret(config.get("JWT_SECRET"))
     if not JWT_SECRET:
         raise AttributeError(f"JWT_SECRET does not have an environment variable: \"jwt_secret\"")
 
-    JWT_ALGORITHM = config.get("jwt_algorithm")
+    JWT_ALGORITHM = config.get("JWT_ALGORITHM")
     if not JWT_ALGORITHM:
         raise AttributeError(f"JWT_ALGORITHM does not have an environment variable: \"jwt_algorithm\"")
 
@@ -75,7 +75,7 @@ class JWTBearer(HTTPBearer):
             "user_id": str(user_id),
             "expires": expiry_time
         }
-        encoded_token = jwt.encode(payload, cls.JWT_SECRET, algorithm=cls.JWT_ALGORITHM)
+        encoded_token = jwt.encode(payload, str(cls.JWT_SECRET), algorithm=cls.JWT_ALGORITHM)
         if remove_bearer:
             token = encoded_token
         else:
@@ -87,7 +87,7 @@ class JWTBearer(HTTPBearer):
     def decode_jwt(cls, token: str) -> dict:
         token = token.replace("Bearer ", "")
         try:
-            decoded_token = jwt.decode(token, cls.JWT_SECRET, algorithms=[cls.JWT_ALGORITHM])
+            decoded_token = jwt.decode(token, str(cls.JWT_SECRET), algorithms=[cls.JWT_ALGORITHM])
             expiry_time = datetime.fromisoformat(decoded_token["expires"])
             return decoded_token if expiry_time >= datetime.now(tz=cls.timezone) else None
         except Exception as error:

@@ -1,10 +1,6 @@
-from fastapi import Depends
-from fastapi import HTTPException
-
 from bcrypt import hashpw
 from bcrypt import gensalt
 from bcrypt import checkpw
-from fastapi.security import APIKeyCookie
 
 from API.Auth import jwt
 

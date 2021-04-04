@@ -1,4 +1,5 @@
 from typing import List
+from typing import Optional
 
 from API.Schemas import BaseInDB
 from API.Schemas import BaseSchema
@@ -11,6 +12,7 @@ class BaseTeam(BaseSchema):
 
 class Team(BaseTeam):
     elo: int
+    discord_id: Optional[int]
 
     class Config:
         schema_extra = {
@@ -31,8 +33,3 @@ class BaseTeamInDB(Team, BaseInDB):
 
 class TeamInDB(BaseTeamInDB):
     players: List[PlayerInDB]
-
-
-class StrippedTeamInDB(BaseTeamInDB):
-    ...
-

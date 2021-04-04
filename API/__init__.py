@@ -1,20 +1,19 @@
 import asyncio
 import os
-
-import uvloop
 import logging
-
 import importlib
 import pkgutil
+import yaml
 
+import uvloop
 import fastapi
+
+from logging import config as log_config
 
 from distutils.util import strtobool
 
 from starlette.config import Config
 
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
 from fastapi.responses import ORJSONResponse
 
 from starlette.routing import Route
@@ -33,10 +32,6 @@ config = Config(root_path / ".env", environ=os.environ)
 
 class BaseApplication:
     app = fastapi.FastAPI(title="MFC Elo", default_response_class=ORJSONResponse)
-
-    app.mount("/Static", StaticFiles(directory=str(root_path) + "/Static"), name="Static")
-
-    templates = Jinja2Templates(directory=str(root_path) + "/Templates")
 
     def __init__(
             self,
@@ -74,18 +69,19 @@ class BaseApplication:
 
     @staticmethod
     def _setup_logging() -> None:
-        log_format = "[%(asctime)s][%(threadName)s][%(name)s.%(funcName)s:%(lineno)d][%(levelname)s] %(message)s"
+        try:
+            if log_config_path := os.getenv("LOG_CONFIG_PATH", default=None):
+                log_config_path = Path(log_config_path)
+            else:
+                log_config_path = root_path / "log_config.yaml"
 
-        file_handler = logging.FileHandler(str(root_path) + "/api.log")
-        file_handler.setLevel(logging.DEBUG)
-        file_handler.setFormatter(logging.Formatter(log_format))
+            with open(log_config_path) as f:
+                logging_config = yaml.safe_load(f)
+        except FileNotFoundError as error:
+            print(f"Could not find your log config at: {str(error).split(' ')[-1]}")
+            return
 
-        logging.basicConfig(
-            level=logging.DEBUG,
-            format=log_format,
-        )
-
-        logging.getLogger().addHandler(file_handler)
+        log_config.dictConfig(logging_config)
 
     @classmethod
     def run(cls, *args, **kwargs) -> None:
@@ -102,9 +98,6 @@ class BaseApplication:
         ModelBase.load_models()
 
         instance_config = dynamic_env_load(cls().uvicorn_config, "uvicorn_", UvicornConfiguration)
-
-        instance_config["loop"] = "uvloop"
-
 
         # Finished setup, run it
         uvloop.install()
@@ -143,8 +136,10 @@ def dynamic_env_load(instance: object, base_match: str, uninstantiated_object) -
     """
 
     instance_vars = vars(instance)
+
     for var in dict(instance_vars).keys():
-        if env_var := config.get(base_match + var, default=None):
+        if env_var := config.get((base_match + var).upper(), default=None):
+
             try:
                 instance_vars[var] = strtobool(str(env_var).casefold())
                 continue
@@ -162,6 +157,7 @@ def dynamic_env_load(instance: object, base_match: str, uninstantiated_object) -
             uninstantiated_object(**instance_vars)
         except TypeError as error:
             error_attr = str(error).split(" ")[-1].strip("'")
+            log.warning(f"Removed kwarg \"{error_attr}\" for object \"{uninstantiated_object}\"")
             instance_vars.pop(error_attr)
 
     return instance_vars

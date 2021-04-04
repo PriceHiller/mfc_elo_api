@@ -8,8 +8,7 @@ from API.Database.Models.Mordhau.Game.set import Set as ModelSet
 from API.Database.Crud.Mordhau.Game.round import get_rounds_by_set_id
 
 from API.Schemas.Mordhau.Game.set import SetInDB as SchemaSetInDB
-from API.Schemas.Mordhau.Game.set import StrippedSetInDB as SchemaStrippedSetInDB
-from API.Schemas.Mordhau.Game.set import CreateSet as SchemaCreateSet
+from API.Schemas.Mordhau.Game.set import Set as SchemaSet
 
 db = BaseDB.db
 
@@ -37,20 +36,20 @@ async def get_set(
             return []
 
     if fetch_one:
-        stripped_set = SchemaStrippedSetInDB(**dict(result))
-        rounds = await get_rounds_by_set_id(stripped_set.id)
+        set = dict(result)
+        rounds = await get_rounds_by_set_id(set["id"])
         return SchemaSetInDB(
-            **dict(stripped_set),
+            **set,
             rounds=rounds
         )
     else:
         sets = []
         for _set in result:
-            single_set = SchemaStrippedSetInDB(**dict(_set))
-            rounds = await get_rounds_by_set_id(single_set.id)
+            set = dict(_set)
+            rounds = await get_rounds_by_set_id(set["id"])
             sets.append(
                 SchemaSetInDB(
-                    **dict(single_set),
+                    **set,
                     rounds=rounds
                 )
             )
@@ -86,7 +85,7 @@ async def get_sets() -> list[SchemaSetInDB]:
     return await get_set(query=query, fetch_one=False)
 
 
-async def create_set(set: SchemaCreateSet):
+async def create_set(set: SchemaSet):
     query: ModelSet.__table__.insert = ModelSet.__table__.insert().values(
         map=set.map.casefold(),
         match_id=set.match_id

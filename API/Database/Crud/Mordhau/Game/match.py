@@ -7,9 +7,14 @@ from API.Database import BaseDB
 from API.Database.Models.Mordhau.Game.match import Match as ModelMatch
 from API.Database.Crud.Mordhau.Game.set import get_sets_by_match_id
 
+# Elo calculation related imports
+from API.Database.Crud.Mordhau.team import get_team_by_id
+from API.Database.Crud.Mordhau.team import update_elo
+from API.ELO.team import Team as ELOTeam
+from API.ELO import ELO
+
 from API.Schemas.Mordhau.Game.match import MatchInDB as SchemaMatchInDB
-from API.Schemas.Mordhau.Game.match import StrippedMatchInDB as SchemaStrippedMatchInDB
-from API.Schemas.Mordhau.Game.match import CreateMatch as SchemaCreateMatch
+from API.Schemas.Mordhau.Game.match import Match as SchemaMatch
 
 db = BaseDB.db
 
@@ -38,20 +43,20 @@ async def get_match(
             return []
 
     if fetch_one:
-        stripped_match = SchemaStrippedMatchInDB(**dict(result))
-        sets = await get_sets_by_match_id(stripped_match.id)
+        match = dict(result)
+        sets = await get_sets_by_match_id(match["id"])
         return SchemaMatchInDB(
-            **dict(stripped_match),
+            **match,
             sets=sets
         )
     else:
         matches = []
         for _match in result:
-            single_match = SchemaStrippedMatchInDB(**dict(_match))
-            sets = await get_sets_by_match_id(single_match.id)
+            single_match = dict(_match)
+            sets = await get_sets_by_match_id(single_match["id"])
             matches.append(
                 SchemaMatchInDB(
-                    **dict(single_match),
+                    **single_match,
                     sets=sets
                 )
             )
@@ -89,10 +94,42 @@ async def get_matches() -> list[SchemaMatchInDB]:
     return await get_match(query=query, fetch_one=False)
 
 
-async def create_match(match: SchemaCreateMatch):
+async def create_match(match: SchemaMatch):
     query: ModelMatch.__table__.insert = ModelMatch.__table__.insert().values(
         team1_id=match.team1_id,
         team2_id=match.team2_id
     )
 
     return await db.execute(query)
+
+
+async def calculate_elo(match_id) -> dict[str, float]:
+    match = await get_match(match_schema=ModelMatch.id, match_str=match_id, fetch_one=True)
+    if not match:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Could not find match with id {match_id}"
+        )
+
+    team1 = await get_team_by_id(match.team1_id)
+    team2 = await get_team_by_id(match.team2_id)
+    
+    team1_rounds_won = 0
+    team2_rounds_won = 0
+    
+    for set in match.sets:
+        for _round in set.rounds:
+            if _round.team1_win:
+                team1_rounds_won += 1
+            else:
+                team2_rounds_won += 1
+    
+    team1_elo = ELOTeam(elo=team1.elo, rounds_won=team1_rounds_won)
+    team2_elo = ELOTeam(elo=team2.elo, rounds_won=team2_rounds_won)
+    
+    new_elo = ELO().calculate(team1_elo, team2_elo)
+    
+    await update_elo(match.team1_id, round(new_elo["team1"]))
+    await update_elo(match.team2_id, round(new_elo["team2"]))
+
+    return new_elo
