@@ -24,7 +24,7 @@ On Windows? Go die.
             
             [[ "${?}" == "0" ]] && echo "Generated PEM Certificate(s)"
             ```
-        - Move the `development.pem` file to the `API` directory
+        - Move the `development.pem` file to the root directory (`MFC-ELO`)
         - In your `.env` add the following
             ```ini
             UVICORN_SSL_KEYFILE=development.pem
