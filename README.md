@@ -206,8 +206,7 @@ All sql variables are preceded by `SQL_`
 
 | Key        | Example Value                                 | Description
 | :---       | :---                                          | :---
-| SQL_DB_URL | `postgresql://username@0.0.0.0:5432/Database` | The database connection url, *
-only* supports postgresql due to the need for postgresql UUID functions
+| SQL_DB_URL | `postgresql://username@0.0.0.0:5432/Database` | The database connection url, *only* supports postgresql due to the need for postgresql UUID functions
 
 ## Uvicorn Variables
 
