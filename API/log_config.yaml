@@ -12,14 +12,14 @@ handlers:
     default_file_handler:
         backupCount: 5
         class: logging.handlers.RotatingFileHandler
-        filename: Bot.log
+        filename: API.log
         formatter: standard
         level: DEBUG
     error_file_handler:
         backupCount: 5
         class: logging.handlers.RotatingFileHandler
         delay: true
-        filename: bot_error.log
+        filename: API_Error.log
         formatter: standard
         level: ERROR
 loggers:
