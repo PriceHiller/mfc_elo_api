@@ -43,7 +43,7 @@ async def get_match(
             return []
 
     if fetch_one:
-        match =dict(result)
+        match = dict(result)
         sets = await get_sets_by_match_id(match["id"])
         return SchemaMatchInDB(
             **match,
@@ -104,13 +104,13 @@ async def create_match(match: SchemaMatch):
 
 
 async def calculate_elo(match_id) -> dict[str, float]:
-    match = await get_match(match_schema=ModelMatch.id, match_str=match_id)
+    match = await get_match(match_schema=ModelMatch.id, match_str=match_id, fetch_one=True)
     if not match:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Could not find match with id {match_id}"
         )
-    
+
     team1 = await get_team_by_id(match.team1_id)
     team2 = await get_team_by_id(match.team2_id)
     

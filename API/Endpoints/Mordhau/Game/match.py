@@ -73,5 +73,5 @@ class Match(BaseEndpoint):
     @route.post("/calculate-match-elo", tags=tags, response_model=BaseSchema)
     async def calculate_match_elo(match_id: UUID4, auth=Depends(JWTBearer())):
         await check_user(token=auth[0], user_id=auth[-1])
-        await calculate_elo(match_id)
-        return BaseSchema(message="Calculated and updated elo.")
+        calculated_elo = await calculate_elo(match_id)
+        return BaseSchema(message="Updated elo.", extra=[calculated_elo])

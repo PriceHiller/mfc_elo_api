@@ -52,19 +52,18 @@ Change your timezone in `postgresql.conf` to `UTC`.
 
 ## Logging
 
-For logging to work you *must* define a `log_config.yaml` file within the `bot` directory based on the the python
+For logging to work you *must* define a `log_config.yaml` file within the `API` directory based on the the python
 logging [dictConfig](https://docs.python.org/3/library/logging.config.html#dictionary-schema-details) *or* set the 
 appropriate log path in your environment, see **Environment Variables**. 
 
 Within your own `log_config.yaml`, assuming you don't use the default, ensure you set `disable_existing_loggers` to
-**false**, otherwise the log messages emitted by [discord.py](https://discordpy.readthedocs.io/en/latest/index.html)
-will not be logged.
+**false**.
 
 An example config in yaml, and the one that ships by default:
 
 ```yaml
 version: 1
-disable_existing_loggers: false # Important, otherwise the discord.py logs will not be logged. Keep this as false
+disable_existing_loggers: false # Important, otherwise messages will not be logged. Keep this as false
 formatters:
     standard:
         format: '[%(asctime)s][%(threadName)s][%(name)s.%(funcName)s:%(lineno)d][%(levelname)s] %(message)s'
@@ -77,14 +76,14 @@ handlers:
     default_file_handler:
         backupCount: 5
         class: logging.handlers.RotatingFileHandler
-        filename: Bot.log
+        filename: API.log
         formatter: standard
         level: DEBUG
     error_file_handler:
         backupCount: 5
         class: logging.handlers.RotatingFileHandler
         delay: true
-        filename: bot_error.log
+        filename: API_Error.log
         formatter: standard
         level: ERROR
 loggers:

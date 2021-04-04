@@ -99,7 +99,7 @@ async def get_team_by_name(team_name: str) -> SchemaTeamInDB:
 
 async def get_team_by_id(id) -> SchemaTeamInDB:
     if result := await get_team(match_schema=ModelTeam.id, match_str=id, fetch_one=True):
-        return result
+        return SchemaTeamInDB(**dict(result))
     else:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
