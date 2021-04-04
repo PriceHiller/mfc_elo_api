@@ -62,7 +62,7 @@ On Windows? Go die.
           `our.ip.address.here` being the ip to your postgresql database and `DatabaseName` being the name of the
           database you're connecting to.
 
-    - Once all of the above is finished ensure you are one in the root directory of the project (`mfc_elo_api`)
+    - Once all of the above is finished ensure you are one in the root directory of the project (`MFC-ELO`)
       and execute the following:
         ```bash
          #!/usr/bin/env bash --posix
