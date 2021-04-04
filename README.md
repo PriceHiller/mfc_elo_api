@@ -2,6 +2,34 @@
 It is *highly* recommended that a `.env` file is created within the `API` directory, otherwise all of your environment
 variables will need to be exported by default into your environment
 
+## SSL Configuration
+
+To generate your key use the following:
+
+```bash
+#!/usr/bin/env bash --posix
+
+openssl req -x509 -newkey rsa:2048 -nodes \
+    -sha256 -subj "/CN=localhost"         \
+    -keyout development.pem               \
+        -out development.pem
+        
+[[ "${?}" == "0" ]] && echo "Generated PEM Certificate(s)"
+```
+
+Once that is done add to your `.env` or environment:
+
+```ini
+UVICORN_SLL_KEYFILE=PATH_TO_PEM_FILE
+UVICORN_SSL_CERTFILE=PATH_TO_PEM_FILE
+UVICORN_SSL_VERSION=2
+UVICORN_SSL_CERT_REQS=0
+```
+
+On `PATH_TO_PEM_FILE` you can either use a relative path from the `API/` directory or a full path.
+It is recommended to place the `.pem` file in the `API/` directory and point the path of both the key and cert files
+to the name of the `.pem`, in this case `development.pem`.
+
 ## Postgresql Configuration
 
 ### Database URL
