@@ -96,3 +96,13 @@ All sql variables are preceded by `sql_`
 | Key  | Example Value | Description
 | :--- | :---          | :---
 | sql_db_url | `postgresql://username@0.0.0.0:5432/Database` | The database connection url, *only* supports postgresql due to the need for postgresql UUID functions
+
+
+## Uvicorn Variables
+
+See [uvicorn settings](https://www.uvicorn.org/settings/) as I sure shit ain't writin' all that bs out.
+
+Effectively, take the name of each setting, append `uvicorn_` to the start of it in your environment and that's
+how you pass arguments to uvicorn in this application.
+
+For example, if you wanted to set the host that uvicorn runs on the host var would be `uvicorn_host`.
