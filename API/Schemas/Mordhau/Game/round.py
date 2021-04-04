@@ -52,8 +52,15 @@ class RoundPlayerInDB(BaseRoundPlayerInDB):
     ...
 
 
-class StrippedRoundPlayerInDB(BaseInDB, BaseSchema):
-    ...
+class CreateRoundPlayers(BaseSchema):
+    class Config:
+        schema_extra = {
+            "example": {
+                "round_players": [CreateRoundPlayer.Config.schema_extra["example"]]
+            }
+        }
+
+    round_players: List[CreateRoundPlayer]
 
 
 class BaseRound(BaseSchema):
@@ -65,10 +72,6 @@ class Round(BaseRound):
     team2_win: bool
 
 
-class CreateRound(Round):
-    ...
-
-
 class BaseRoundInDB(Round, BaseInDB):
     team1_players: List[RoundPlayerInDB]
     team2_players: List[RoundPlayerInDB]
@@ -76,18 +79,3 @@ class BaseRoundInDB(Round, BaseInDB):
 
 class RoundInDB(BaseRoundInDB):
     ...
-
-
-class StrippedRoundInDB(Round, BaseInDB):
-    ...
-
-
-class CreateRoundPlayers(BaseSchema):
-    class Config:
-        schema_extra = {
-            "example": {
-                "round_players": [CreateRoundPlayer.Config.schema_extra["example"]]
-            }
-        }
-
-    round_players: List[CreateRoundPlayer]

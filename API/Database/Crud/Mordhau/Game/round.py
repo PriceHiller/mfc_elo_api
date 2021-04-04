@@ -9,8 +9,7 @@ from API.Database.Crud.Mordhau.Game.round_player import get_round_players_by_rou
 from API.Database.Crud.Mordhau.Game.round_player import create_round_player
 
 from API.Schemas.Mordhau.Game.round import RoundInDB as SchemaRoundInDB
-from API.Schemas.Mordhau.Game.round import CreateRound as SchemaCreateRound
-from API.Schemas.Mordhau.Game.round import StrippedRoundInDB as SchemaStrippedRoundInDB
+from API.Schemas.Mordhau.Game.round import Round as SchemaRound
 
 from API.Schemas.Mordhau.Game.round import RoundPlayerInDB as SchemaRoundPlayerInDB
 
@@ -56,25 +55,24 @@ async def get_round(
             return []
 
     if fetch_one:
-        stripped_round = SchemaStrippedRoundInDB(**dict(result))
-        round_players = await get_round_players_by_round_id(stripped_round.id)
+        round= dict(result)
+        round_players = await get_round_players_by_round_id(round["id"])
         team1_players, team2_players = parse_rounds(round_players)
 
         return SchemaRoundInDB(
-            **dict(stripped_round),
+            **round,
             team1_players=team1_players,
             team2_players=team2_players
         )
     else:
         rounds = []
         for _round in result:
-            single_round = SchemaStrippedRoundInDB(**dict(_round))
-            round_players = await get_round_players_by_round_id(single_round.id)
-            print(round_players)
+            single_round = dict(_round)
+            round_players = await get_round_players_by_round_id(single_round["id"])
             team1_players, team2_players = parse_rounds(round_players)
             rounds.append(
                 SchemaRoundInDB(
-                    **dict(single_round),
+                    **single_round,
                     team1_players=team1_players,
                     team2_players=team2_players
                 )
@@ -108,7 +106,7 @@ async def get_rounds() -> list[SchemaRoundPlayerInDB]:
     return await get_round(query=query, fetch_one=False)
 
 
-async def create_round(round: SchemaCreateRound):
+async def create_round(round: SchemaRound):
     query: ModelRound.__table__.insert = ModelRound.__table__.insert().values(
         set_id=round.set_id,
         team1_win=round.team1_win,

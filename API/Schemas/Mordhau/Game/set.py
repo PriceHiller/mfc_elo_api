@@ -16,10 +16,6 @@ class BaseSet(BaseSchema):
 
 
 class Set(BaseSet):
-    ...
-
-
-class CreateSet(BaseSet):
     class Config:
         schema_extra = {
             "example": {
@@ -34,8 +30,4 @@ class BaseSetInDB(Set, BaseInDB):
 
 
 class SetInDB(BaseSetInDB):
-    ...
-
-
-class StrippedSetInDB(BaseSet, BaseInDB):
     ...

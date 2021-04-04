@@ -27,9 +27,9 @@ from API.Database.Crud.Mordhau.Game.round_player import create_all_round_players
 
 from API.Schemas import BaseSchema
 from API.Schemas.Mordhau.Game.round import RoundInDB
-from API.Schemas.Mordhau.Game.round import CreateRound
 from API.Schemas.Mordhau.Game.round import RoundPlayerInDB
 from API.Schemas.Mordhau.Game.round import CreateRoundPlayer
+from API.Schemas.Mordhau.Game.round import Round
 from API.Schemas.Mordhau.Game.round import CreateRoundPlayers
 
 from API.Endpoints import BaseEndpoint
@@ -64,7 +64,7 @@ class Round(BaseEndpoint):
 
     @staticmethod
     @route.post("/create-round", tags=tags, response_model=BaseSchema)
-    async def create_round(round: CreateRound, auth=Depends(JWTBearer())):
+    async def create_round(round: Round, auth=Depends(JWTBearer())):
         await check_user(token=auth[0], user_id=auth[-1])
         round_id = await create_round(round)
         return BaseSchema(

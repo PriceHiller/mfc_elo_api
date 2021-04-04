@@ -8,8 +8,7 @@ from API.Database.Models.Mordhau.Game.match import Match as ModelMatch
 from API.Database.Crud.Mordhau.Game.set import get_sets_by_match_id
 
 from API.Schemas.Mordhau.Game.match import MatchInDB as SchemaMatchInDB
-from API.Schemas.Mordhau.Game.match import StrippedMatchInDB as SchemaStrippedMatchInDB
-from API.Schemas.Mordhau.Game.match import CreateMatch as SchemaCreateMatch
+from API.Schemas.Mordhau.Game.match import Match as SchemaMatch
 
 db = BaseDB.db
 
@@ -38,17 +37,17 @@ async def get_match(
             return []
 
     if fetch_one:
-        stripped_match = SchemaStrippedMatchInDB(**dict(result))
-        sets = await get_sets_by_match_id(stripped_match.id)
+        match =dict(result)
+        sets = await get_sets_by_match_id(match["id"])
         return SchemaMatchInDB(
-            **dict(stripped_match),
+            **match,
             sets=sets
         )
     else:
         matches = []
         for _match in result:
-            single_match = SchemaStrippedMatchInDB(**dict(_match))
-            sets = await get_sets_by_match_id(single_match.id)
+            single_match = dict(_match)
+            sets = await get_sets_by_match_id(single_match["id"])
             matches.append(
                 SchemaMatchInDB(
                     **dict(single_match),
@@ -89,7 +88,7 @@ async def get_matches() -> list[SchemaMatchInDB]:
     return await get_match(query=query, fetch_one=False)
 
 
-async def create_match(match: SchemaCreateMatch):
+async def create_match(match: SchemaMatch):
     query: ModelMatch.__table__.insert = ModelMatch.__table__.insert().values(
         team1_id=match.team1_id,
         team2_id=match.team2_id

@@ -10,7 +10,6 @@ from API.Database import BaseDB
 
 from API.Schemas.Mordhau.team import TeamInDB as SchemaTeamInDB
 from API.Schemas.Mordhau.team import Team as SchemaTeam
-from API.Schemas.Mordhau.team import StrippedTeamInDB as SchemaTeamStrippedInDB
 
 from .player import get_player_by_id
 from .player import get_players_by_team_id
@@ -18,12 +17,48 @@ from .player import get_players_by_team_id
 db = BaseDB.db
 
 
-async def get_full_team(team: SchemaTeamStrippedInDB) -> SchemaTeamInDB:
-    players = await get_players_by_team_id(team.id)
-    return SchemaTeamInDB(
-        **dict(team),
-        players=players
-    )
+async def get_team(
+        match_schema=None,
+        match_str=None,
+        query=None,
+        fetch_one=False
+) -> [[SchemaTeamInDB], SchemaTeamInDB]:
+    if query is None:
+        if not match_schema or not match_str:
+            raise ValueError("If query is not passed both match_schema and match_str must be passed values")
+        query: ModelTeam.__table__.select = ModelTeam.__table__.select().where(
+            match_schema == match_str
+        )
+
+    if fetch_one:
+        result = await db.fetch_one(query)
+        if not result:
+            return None
+    else:
+        result = await db.fetch_all(query)
+        if not result:
+            return []
+
+    if fetch_one:
+        team = dict(result)
+        players = await get_players_by_team_id(team["id"])
+
+        return SchemaTeamInDB(
+            **team,
+            players=players
+        )
+    else:
+        teams = []
+        for _team in result:
+            single_team = dict(_team)
+            players = await get_players_by_team_id(single_team["id"])
+            teams.append(
+                SchemaTeamInDB(
+                    players=players,
+                    **single_team,
+                )
+            )
+        return teams
 
 
 async def create_team(team: SchemaTeam):
@@ -49,18 +84,12 @@ async def delete_team(team_id):
 async def get_teams() -> list[SchemaTeamInDB]:
     query: ModelTeam.__table__.select = ModelTeam.__table__.select()
 
-    if result := await db.fetch_all(query):
-        return [await get_full_team(SchemaTeamStrippedInDB(**dict(team))) for team in result]
-    return []
+    return await get_team(query=query, fetch_one=False)
 
 
 async def get_team_by_name(team_name: str) -> SchemaTeamInDB:
-    query: ModelTeam.__table__.select = ModelTeam.__table__.select().where(
-        ModelTeam.team_name == team_name
-    )
-
-    if result := await db.fetch_one(query):
-        return await get_full_team(SchemaTeamStrippedInDB(**dict(result)))
+    if result := await get_team(match_schema=ModelTeam.team_name, match_str=team_name, fetch_one=True):
+        return result
     else:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -69,12 +98,8 @@ async def get_team_by_name(team_name: str) -> SchemaTeamInDB:
 
 
 async def get_team_by_id(id) -> SchemaTeamInDB:
-    query: ModelTeam.__table__.select = ModelTeam.__table__.select().where(
-        ModelTeam.id == id
-    )
-    if result := dict(await db.fetch_one(query)):
-        team = SchemaTeamStrippedInDB(**dict(result))
-        return await get_full_team(team)
+    if result := await get_team(match_schema=ModelTeam.id, match_str=id, fetch_one=True):
+        return result
     else:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

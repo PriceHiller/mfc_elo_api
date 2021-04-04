@@ -16,10 +16,6 @@ class BaseMatch(BaseSchema):
 
 
 class Match(BaseMatch):
-    ...
-
-
-class CreateMatch(BaseMatch):
     class Config:
         schema_extra = {
             "example": {
@@ -35,7 +31,3 @@ class BaseMatchInDB(Match, BaseInDB):
 
 class MatchInDB(BaseMatchInDB):
     sets: List[SetInDB]
-
-
-class StrippedMatchInDB(BaseMatchInDB):
-    ...

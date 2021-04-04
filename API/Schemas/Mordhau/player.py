@@ -26,10 +26,6 @@ class Player(BasePlayer):
     ...
 
 
-class CreatePlayer(Player):
-    ...
-
-
 class BasePlayerInDB(BasePlayer, BaseInDB):
     ...
 

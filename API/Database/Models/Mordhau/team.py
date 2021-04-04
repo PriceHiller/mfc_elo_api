@@ -15,4 +15,5 @@ class Team(ModelBase, AlcBase):
     team_name = sqlalchemy.Column(sqlalchemy.String, unique=True, nullable=False)
     elo = sqlalchemy.Column(sqlalchemy.Integer
                             , index=True, nullable=False)
+    discord_id = sqlalchemy.Column(sqlalchemy.BigInteger, unique=True, index=True, nullable=True)
     player = relationship(Player, cascade="all")
