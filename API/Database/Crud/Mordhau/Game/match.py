@@ -50,7 +50,7 @@ async def get_match(
             sets = await get_sets_by_match_id(single_match["id"])
             matches.append(
                 SchemaMatchInDB(
-                    **dict(single_match),
+                    **single_match,
                     sets=sets
                 )
             )
@@ -95,3 +95,13 @@ async def create_match(match: SchemaMatch):
     )
 
     return await db.execute(query)
+
+
+async def calculate_elo(match_id):
+    match = get_match(match_schema=ModelMatch.id, match_str=match_id)
+    if not match:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Could not find match with id {match_id}"
+        )
+

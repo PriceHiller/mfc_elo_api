@@ -46,7 +46,7 @@ async def get_set(
         sets = []
         for _set in result:
             set = dict(_set)
-            rounds = await get_rounds_by_set_id(**set)
+            rounds = await get_rounds_by_set_id(set["id"])
             sets.append(
                 SchemaSetInDB(
                     **set,
