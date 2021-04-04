@@ -72,8 +72,8 @@ loggers:
 
 # Environment Variables
 
-
 All environment variables are entered in uppercase.
+
 ## Logging Variables
 
 All logging variables are preceded by log_
@@ -93,7 +93,7 @@ All jwt variables are preceded by `JWT_`
 
 ## SQL Variables
 
-All sql variables are preceded by `sql_`
+All sql variables are preceded by `SQL_`
 
 | Key        | Example Value                                 | Description
 | :---       | :---                                          | :---
