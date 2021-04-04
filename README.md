@@ -72,37 +72,39 @@ loggers:
 
 # Environment Variables
 
+
+All environment variables are entered in uppercase.
 ## Logging Variables
 
 All logging variables are preceded by log_
 
-| Key  | Example Value | Description
-| :--- | :---          | :---
-| log_config_path | /Users/user/MFC_Bot/bot/log_config.yaml | The path (including the name of the file) of your log config.
+| Key             | Example Value | Description
+| :---            | :---          | :---
+| LOG_CONFIG_PATH | /Users/user/MFC_Bot/bot/log_config.yaml | The path (including the name of the file) of your log config.
 
 ## JWT Variables
 
-All jwt variables are preceded by `jwt_`
+All jwt variables are preceded by `JWT_`
 
 | Key           | Example Value                                                            | Description
 | :---          | :---                                                                     | :---
-| jwt_secret    | d18edfac5b16c1839a203aadc57df7c3303b9c76707398996da65dcb2797889f1ec4a2de | The JWT secret used to generate JWT tokens, ideally at least 32 characters long.
-| jwt_algorithm | HS256                                                                    | The algorithm that is used when generating JWT tokens
+| JWT_SECRET    | d18edfac5b16c1839a203aadc57df7c3303b9c76707398996da65dcb2797889f1ec4a2de | The JWT secret used to generate JWT tokens, ideally at least 32 characters long.
+| JWT_ALGORITHM | HS256                                                                    | The algorithm that is used when generating JWT tokens
 
 ## SQL Variables
 
 All sql variables are preceded by `sql_`
 
-| Key  | Example Value | Description
-| :--- | :---          | :---
-| sql_db_url | `postgresql://username@0.0.0.0:5432/Database` | The database connection url, *only* supports postgresql due to the need for postgresql UUID functions
+| Key        | Example Value                                 | Description
+| :---       | :---                                          | :---
+| SQL_DB_URL | `postgresql://username@0.0.0.0:5432/Database` | The database connection url, *only* supports postgresql due to the need for postgresql UUID functions
 
 
 ## Uvicorn Variables
 
 See [uvicorn settings](https://www.uvicorn.org/settings/) as I sure shit ain't writin' all that bs out.
 
-Effectively, take the name of each setting, append `uvicorn_` to the start of it in your environment and that's
+Effectively, take the name of each setting, append `UVICORN_` to the start of it in your environment and that's
 how you pass arguments to uvicorn in this application.
 
-For example, if you wanted to set the host that uvicorn runs on the host var would be `uvicorn_host`.
+For example, if you wanted to set the host that uvicorn runs on the host var would be `UVICORN_HOST`.
