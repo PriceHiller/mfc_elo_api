@@ -1,13 +1,14 @@
 import asyncio
 import os
-
-import uvloop
 import logging
-
 import importlib
 import pkgutil
+import yaml
 
+import uvloop
 import fastapi
+
+from logging import config as log_config
 
 from distutils.util import strtobool
 
@@ -74,18 +75,19 @@ class BaseApplication:
 
     @staticmethod
     def _setup_logging() -> None:
-        log_format = "[%(asctime)s][%(threadName)s][%(name)s.%(funcName)s:%(lineno)d][%(levelname)s] %(message)s"
+        try:
+            if log_config_path := os.getenv("log_config_path", default=None):
+                log_config_path = Path(log_config_path)
+            else:
+                log_config_path = root_path / "log_config.yaml"
 
-        file_handler = logging.FileHandler(str(root_path) + "/api.log")
-        file_handler.setLevel(logging.DEBUG)
-        file_handler.setFormatter(logging.Formatter(log_format))
+            with open(log_config_path) as f:
+                logging_config = yaml.safe_load(f)
+        except FileNotFoundError as error:
+            print(f"Could not find your log config at: {str(error).split(' ')[-1]}")
+            return
 
-        logging.basicConfig(
-            level=logging.DEBUG,
-            format=log_format,
-        )
-
-        logging.getLogger().addHandler(file_handler)
+        log_config.dictConfig(logging_config)
 
     @classmethod
     def run(cls, *args, **kwargs) -> None:
