@@ -1,3 +1,22 @@
+
+# Todo
+- [ ] Add requirements to Setup.py
+# Setup and Installation
+
+For OS X and Linux the following bash will install all dependencies and run the program.
+
+On Windows? Go die.
+
+```bash
+python -m venv venv
+source venv/bin/activate
+pip install wheel
+pip install --upgrade pip
+pip install -r requirements.txt
+python setup.py install
+python -m API
+```
+
 # Configuration
 It is *highly* recommended that a `.env` file is created within the `API` directory, otherwise all of your environment
 variables will need to be exported by default into your environment

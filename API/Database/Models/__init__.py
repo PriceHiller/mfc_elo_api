@@ -8,7 +8,7 @@ from datetime import timezone
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy import MetaData
 from sqlalchemy.ext.declarative import as_declarative
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.ext.declarative import declarative_base
 from API import find_subclasses
 
 AlcBase = declarative_base()

@@ -7,8 +7,6 @@ from fastapi.responses import ORJSONResponse
 from API import BaseApplication
 from API import find_subclasses
 
-TemplateResponse = BaseApplication.templates.TemplateResponse
-
 log = logging.getLogger(__name__)
 
 
@@ -42,10 +40,6 @@ class BaseEndpoint:
                     log.warning(f"{base_subcls_msg} is not of type \"list\"")
             except AttributeError:
                 log.warning(f"{base_subcls_msg} lacks a tags list attribute!")
-
-    @staticmethod
-    def html_response(filename: str, request: Request, **template_data) -> TemplateResponse:
-        return TemplateResponse(filename, {"request": request, **template_data})
 
 
 __all__ = [

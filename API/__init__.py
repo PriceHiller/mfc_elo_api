@@ -14,8 +14,6 @@ from distutils.util import strtobool
 
 from starlette.config import Config
 
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
 from fastapi.responses import ORJSONResponse
 
 from starlette.routing import Route
@@ -34,10 +32,6 @@ config = Config(root_path / ".env", environ=os.environ)
 
 class BaseApplication:
     app = fastapi.FastAPI(title="MFC Elo", default_response_class=ORJSONResponse)
-
-    app.mount("/Static", StaticFiles(directory=str(root_path) + "/Static"), name="Static")
-
-    templates = Jinja2Templates(directory=str(root_path) + "/Templates")
 
     def __init__(
             self,
