@@ -27,7 +27,7 @@ On Windows? Go die.
         - Move the `development.pem` file to the `API` directory
         - In your `.env` add the following
             ```ini
-            UVICORN_SLL_KEYFILE=development.pem
+            UVICORN_SSL_KEYFILE=development.pem
             UVICORN_SSL_CERTFILE=development.pem
             UVICORN_SSL_VERSION=2
             UVICORN_SSL_CERT_REQS=0
