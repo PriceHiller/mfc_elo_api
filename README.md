@@ -22,7 +22,63 @@ Change your timezone in `postgresql.conf` to `UTC`.
 #### Locations
 `postgresql.conf` on M1 Mac is located at `/Users/user/Library/Application Support/Postgres/var-13`
 
+## Logging
+
+For logging to work you *must* define a `log_config.yaml` file within the `bot` directory based on the the python
+logging [dictConfig](https://docs.python.org/3/library/logging.config.html#dictionary-schema-details) *or* set the 
+appropriate log path in your environment, see **Environment Variables**. 
+
+Within your own `log_config.yaml`, assuming you don't use the default, ensure you set `disable_existing_loggers` to
+**false**, otherwise the log messages emitted by [discord.py](https://discordpy.readthedocs.io/en/latest/index.html)
+will not be logged.
+
+An example config in yaml, and the one that ships by default:
+
+```yaml
+version: 1
+disable_existing_loggers: false # Important, otherwise the discord.py logs will not be logged. Keep this as false
+formatters:
+    standard:
+        format: '[%(asctime)s][%(threadName)s][%(name)s.%(funcName)s:%(lineno)d][%(levelname)s] %(message)s'
+handlers:
+    default_stream_handler:
+        class: logging.StreamHandler
+        formatter: standard
+        level: INFO
+        stream: ext://sys.stdout
+    default_file_handler:
+        backupCount: 5
+        class: logging.handlers.RotatingFileHandler
+        filename: Bot.log
+        formatter: standard
+        level: DEBUG
+    error_file_handler:
+        backupCount: 5
+        class: logging.handlers.RotatingFileHandler
+        delay: true
+        filename: bot_error.log
+        formatter: standard
+        level: ERROR
+loggers:
+    '': # The root logger, best to leave it undefined (don't enter a string)
+        handlers:
+            - default_stream_handler
+            - default_file_handler
+            - error_file_handler
+        level: DEBUG
+        propagate: false
+```
+
+
 # Environment Variables
+
+## Logging Variables
+
+All logging variables are preceded by log_
+
+| Key  | Example Value | Description
+| :--- | :---          | :---
+| log_config_path | /Users/user/MFC_Bot/bot/log_config.yaml | The path (including the name of the file) of your log config.
 
 ## JWT Variables
 
