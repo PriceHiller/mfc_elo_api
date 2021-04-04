@@ -105,9 +105,6 @@ class BaseApplication:
 
         instance_config = dynamic_env_load(cls().uvicorn_config, "uvicorn_", UvicornConfiguration)
 
-        instance_config["loop"] = "uvloop"
-
-
         # Finished setup, run it
         uvloop.install()
         asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
@@ -145,8 +142,10 @@ def dynamic_env_load(instance: object, base_match: str, uninstantiated_object) -
     """
 
     instance_vars = vars(instance)
+
     for var in dict(instance_vars).keys():
-        if env_var := config.get(base_match + var, default=None):
+        if env_var := config.get((base_match + var).upper(), default=None):
+
             try:
                 instance_vars[var] = strtobool(str(env_var).casefold())
                 continue
@@ -164,6 +163,7 @@ def dynamic_env_load(instance: object, base_match: str, uninstantiated_object) -
             uninstantiated_object(**instance_vars)
         except TypeError as error:
             error_attr = str(error).split(" ")[-1].strip("'")
+            log.warning(f"Removed kwarg \"{error_attr}\" for object \"{uninstantiated_object}\"")
             instance_vars.pop(error_attr)
 
     return instance_vars

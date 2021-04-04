@@ -19,11 +19,11 @@ log = logging.getLogger(__name__)
 
 
 class JWTBearer(HTTPBearer):
-    JWT_SECRET = config.get("jwt_secret")
+    JWT_SECRET = config.get("JWT_SECRET")
     if not JWT_SECRET:
         raise AttributeError(f"JWT_SECRET does not have an environment variable: \"jwt_secret\"")
 
-    JWT_ALGORITHM = config.get("jwt_algorithm")
+    JWT_ALGORITHM = config.get("JWT_ALGORITHM")
     if not JWT_ALGORITHM:
         raise AttributeError(f"JWT_ALGORITHM does not have an environment variable: \"jwt_algorithm\"")
 

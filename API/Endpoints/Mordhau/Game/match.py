@@ -15,6 +15,7 @@ from API.Database.Crud.Mordhau.Game.match import get_matches_by_team_ids
 from API.Database.Crud.Mordhau.Game.match import get_matches_by_team_id
 from API.Database.Crud.Mordhau.Game.match import get_matches
 from API.Database.Crud.Mordhau.Game.match import create_match
+from API.Database.Crud.Mordhau.Game.match import calculate_elo
 from API.Database.Crud.User.user import check_user
 
 from API.Schemas import BaseSchema
@@ -67,3 +68,10 @@ class Match(BaseEndpoint):
             message=f"Created match with id: {match_id}",
             extra=[{"match id": match_id}]
         )
+
+    @staticmethod
+    @route.post("/calculate-match-elo", tags=tags, response_model=BaseSchema)
+    async def calculate_match_elo(match_id: UUID4, auth=Depends(JWTBearer())):
+        await check_user(token=auth[0], user_id=auth[-1])
+        await calculate_elo(match_id)
+        return BaseSchema(message="Calculated and updated elo.")

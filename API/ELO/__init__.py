@@ -86,7 +86,8 @@ class ELO:
         return elo_result_dict
 
 
-team1 = Team(elo=1500, rounds_won=3)
-team2 = Team(elo=1400, rounds_won=1)
+if __name__ == "__main__":
+    team1 = Team(elo=1500, rounds_won=3)
+    team2 = Team(elo=1400, rounds_won=1)
 
-print(ELO().calculate(team1, team2))
+    print(ELO().calculate(team1, team2))

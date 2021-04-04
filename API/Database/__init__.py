@@ -10,7 +10,7 @@ from API.Database.Models import metadata
 
 
 class BaseDB:
-    SQLALCHEMY_DATABASE_URL = config.get("sql_db_url")
+    SQLALCHEMY_DATABASE_URL = config.get("SQL_DB_URL")
 
     if not SQLALCHEMY_DATABASE_URL:
         raise AttributeError(f"SQLALCHEMY_DATABASE_URL does not have an environment variable: \"sql_db_url\"")
