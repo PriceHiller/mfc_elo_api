@@ -66,7 +66,11 @@ class Match(BaseEndpoint):
         log.info(f"User \"{auth[-1]}\" created a match \"{match_id}\"")
         return BaseSchema(
             message=f"Created match with id: {match_id}",
-            extra=[{"match id": match_id}]
+            extra=[
+                {
+                    "match_id": match_id
+                }
+            ]
         )
 
     @staticmethod

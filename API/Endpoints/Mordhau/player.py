@@ -23,6 +23,7 @@ from API.Database.Crud.Mordhau.player import get_player_by_playfab_id
 
 from API.Schemas.Mordhau.player import Player
 from API.Schemas.Mordhau.player import PlayerInDB
+from API.Schemas import BaseSchema
 
 log = logging.getLogger(__name__)
 
@@ -56,7 +57,7 @@ class MordhauPlayer(BaseEndpoint):
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Player with name {player_name} not found"
         )
-    
+
     @staticmethod
     @route.get("/playfab-id", tags=tags, response_model=PlayerInDB)
     async def playfab_id(playfab_id):
@@ -68,11 +69,16 @@ class MordhauPlayer(BaseEndpoint):
         )
 
     @staticmethod
-    @route.post("/create", tags=tags)
-    async def create(player: Player, auth=Depends(JWTBearer())) -> dict[str, str]:
+    @route.post("/create", tags=tags, response_model=BaseSchema)
+    async def create(player: Player, auth=Depends(JWTBearer())) -> BaseSchema:
         await check_user(token=auth[0], user_id=auth[-1])
         log.info(f"User id \"{auth[-1]}\" issued a creation of Mordhau Player \"{player.player_name}\"")
-        return {"Player ID": await create_player(player)}
+        return BaseSchema(
+            message="Created player",
+            extra=[
+                {"player_id": await create_player(player)}
+            ]
+        )
 
     @staticmethod
     @route.post("/delete", tags=tags)

@@ -110,11 +110,11 @@ async def get_team_by_id(id) -> SchemaTeamInDB:
 async def update_name(team_id, new_name: str) -> SchemaTeamInDB:
     query: ModelTeam.__table__.update = ModelTeam.__table__.update().where(
         ModelTeam.id == team_id
-    ).values(team_name=new_name)
+    ).values(team_name=new_name.lower())
 
     await db.execute(query)
 
-    return await get_team_by_name(new_name)
+    return await get_team_by_name(new_name.lower())
 
 
 async def update_elo(team_id, new_elo: int) -> SchemaTeamInDB:
