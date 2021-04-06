@@ -17,7 +17,7 @@ A user will be created for you, details:
   ```json
   {
     "username": "marklar",
-    "password": "lTL_vMnLV5iA_jEq"
+    "password": "vMnLV5iAjEq@9202"
   }
   ```
 - This will return something similar to the following json:
