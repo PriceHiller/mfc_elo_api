@@ -8,7 +8,7 @@ A user will be created for you, details:
 
 ```
 - Username: `marklar`
-- Password: `lTL_vMnLV5iA_jEq`
+- Password: `vMnLV5iAjEq@9202`
 ```
 
 ### Logging in
