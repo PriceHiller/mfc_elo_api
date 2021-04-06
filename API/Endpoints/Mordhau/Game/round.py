@@ -102,13 +102,7 @@ class Round(BaseEndpoint):
         return await get_round_players()
 
     @staticmethod
-    @route.post("/create-round-player", tags=tags, response_model=BaseSchema)
-    async def create_round_player(round_player: CreateRoundPlayer, auth=Depends(JWTBearer())):
-        await check_user(token=auth[0], user_id=auth[-1])
-        return await create_round_player(round_player)
-
-    @staticmethod
-    @route.post("/create-all-round-players", tags=tags, response_model=BaseSchema)  # Shit endpoint name, pls god rename
+    @route.post("/create-round-players", tags=tags, response_model=BaseSchema)  # Shit endpoint name, pls god rename
     async def create_round_all(round_players: CreateRoundPlayers, auth=Depends(JWTBearer())):
         await check_user(token=auth[0], user_id=auth[-1])
         round_player_ids = [str(round_player_id) for round_player_id in await create_all_round_players(round_players)]

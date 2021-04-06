@@ -69,7 +69,6 @@ class ELO:
         expected_score = self._calculate_expected_score(team1.elo, team2.elo)
         baseline = self._calculate_baseline(team1.rounds_won, team2.rounds_won)
 
-        print(baseline)
         team1_new_elo = team1.elo + (self.volatility * (rounds_ratio - expected_score)) + baseline
         elo_change = abs(team1_new_elo - team1.elo)
 
@@ -87,7 +86,7 @@ class ELO:
 
 
 if __name__ == "__main__":
-    team1 = Team(elo=1500, rounds_won=3)
-    team2 = Team(elo=1400, rounds_won=1)
+    team1 = Team(elo=2022, rounds_won=3)
+    team2 = Team(elo=2087, rounds_won=2)
 
     print(ELO().calculate(team1, team2))

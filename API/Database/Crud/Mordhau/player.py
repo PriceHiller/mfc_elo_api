@@ -72,7 +72,7 @@ async def get_player_by_playfab_id(playfab_id) -> SchemaPlayerInDB:
     else:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Could not find player: {id}",
+            detail=f"Could not find player: {playfab_id}",
         )
 
 

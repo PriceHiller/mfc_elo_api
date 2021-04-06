@@ -65,7 +65,6 @@ class BaseRound(BaseSchema):
 
 
 class Round(BaseRound):
-
     class Config:
         schema_extra = {
             "example": {
@@ -77,14 +76,6 @@ class Round(BaseRound):
 
     team1_win: bool
     team2_win: bool
-
-    @validator("team1_win")
-    def validate_only_one_team_won(cls, v, values, **kwargs):
-        print(v)
-        print(values)
-        print(dict(kwargs))
-        if v == values["team2_win"]:
-            raise ValueError("Only one team may win or lose a round, both teams reported the same value")
 
 
 class BaseRoundInDB(Round, BaseInDB):

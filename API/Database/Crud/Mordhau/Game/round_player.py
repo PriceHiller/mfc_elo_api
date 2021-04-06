@@ -107,7 +107,13 @@ async def create_round_player(round_player: SchemaCreateRoundPlayer) -> UUID4:
         round_id=round_player.round_id
     )
 
-    return await db.execute(query)
+    try:
+        return await db.execute(query)
+    except DataError as error:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(error)
+        )
 
 
 async def create_all_round_players(round_all: SchemaCreateRoundPlayers):
