@@ -1,17 +1,18 @@
 import sqlalchemy
 
-from API.Database.Models import ModelBase
-from API.Database.Models import AlcBase
+from sqlalchemy.ext.declarative import as_declarative
 
 
-class DiscordID(ModelBase, AlcBase):
+@as_declarative()
+class DiscordID:
     discord_id = sqlalchemy.Column(
         sqlalchemy.String,
         index=True,
     )
 
 
-class Permission(ModelBase, AlcBase):
+@as_declarative()
+class PermissionJSON:
     permission_col = sqlalchemy.Column(
         sqlalchemy.JSON,
         nullable=True
