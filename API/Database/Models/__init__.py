@@ -1,9 +1,5 @@
-import uuid
 import logging
 import sqlalchemy
-
-from datetime import datetime
-from datetime import timezone
 
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy import MetaData

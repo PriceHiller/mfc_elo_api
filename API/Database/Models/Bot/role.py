@@ -2,19 +2,15 @@ import sqlalchemy
 
 from API.Database.Models import ModelBase
 from API.Database.Models import AlcBase
+from API.Database.Models.Bot import DiscordID
+from API.Database.Models.Bot import Permission
 
 
-class Prefix(ModelBase, AlcBase):
-    __tablename__ = "discord_prefix"
+class Role(ModelBase, AlcBase, DiscordID, Permission):
+    __tablename__ = "discord_guild"
 
-    prefix = sqlalchemy.Column(
-        sqlalchemy.String,
-        index=True,
-        unique=False,
-        nullable=False
-    )
     guild_id = sqlalchemy.Column(
-        sqlalchemy.BigInteger,
+        sqlalchemy.String,
         sqlalchemy.ForeignKey("discord_guild.id"),
         unique=True,
         nullable=False
