@@ -73,7 +73,7 @@ class JWTBearer(HTTPBearer):
         log.info(f"Issued a token for user_id: \"{user_id}\" that expires \"{expiry_time}\"")
         payload = {
             "user_id": str(user_id),
-            "expires": expiry_time
+            "expires": expiry_time,
         }
         encoded_token = jwt.encode(payload, str(cls.JWT_SECRET), algorithm=cls.JWT_ALGORITHM)
         if remove_bearer:

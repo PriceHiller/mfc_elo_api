@@ -32,3 +32,4 @@ class BasePlayerInDB(BasePlayer, BaseInDB):
 
 class PlayerInDB(BasePlayerInDB):
     team_id: Optional[Union[UUID4, str, int]] = Field(..., minlength=32, maxlength=36)
+    ambassador: Optional[bool]
