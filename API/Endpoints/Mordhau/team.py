@@ -13,6 +13,7 @@ from API.Database.Crud.Mordhau.team import get_teams
 from API.Database.Crud.Mordhau.team import remove_player_from_team
 from API.Database.Crud.Mordhau.team import add_player_to_team
 from API.Database.Crud.Mordhau.team import get_team_by_id
+from API.Database.Crud.Mordhau.team import get_team_by_discord_id
 from API.Database.Crud.Mordhau.team import get_team_by_name
 from API.Database.Crud.Mordhau.team import create_team
 from API.Database.Crud.Mordhau.team import delete_team
@@ -49,6 +50,11 @@ class MordhauTeam(BaseEndpoint):
         )
 
     @staticmethod
+    @route.get("/discord-id", tags=tags, response_model=TeamInDB)
+    async def get_team_by_discord_id(discord_id: int):
+        return await get_team_by_discord_id(discord_id)
+
+    @staticmethod
     @route.get("/name", tags=tags, response_model=TeamInDB)
     async def name(team_name: str):
         if team := await get_team_by_name(team_name):
@@ -70,11 +76,12 @@ class MordhauTeam(BaseEndpoint):
 
     @staticmethod
     @route.post("/create", tags=tags)
-    async def create(team: Team, auth=Depends(JWTBearer())) -> dict[str, str]:
+    async def create(team: Team, auth=Depends(JWTBearer())) -> BaseSchema:
         await check_user(token=auth[0], user_id=auth[-1])
         log.info(f"User id \"{auth[-1]}\" issued a creation of "
                  f"Mordhau Team \"{team.team_name}\"")
-        return {"Team ID": await create_team(team)}
+        team_id = await create_team(team)
+        return BaseSchema(message=f"Team ID: {team_id}", extra=[{"id": team_id}])
 
     @staticmethod
     @route.post("/delete", tags=tags, response_model=BaseSchema)
@@ -83,7 +90,7 @@ class MordhauTeam(BaseEndpoint):
         if team_id and await get_team_by_id(team_id):
             log.info(f"User id \"{auth[-1]}\" issued a delete of Mordhau Team id \"{team_id}\"")
             await delete_team(team_id)
-            return BaseSchema(message=f"Team {team_id} deleted")
+            return BaseSchema(message=f"Team {team_id} deleted", extra=[{"id": team_id}])
 
     @staticmethod
     @route.post("/update-elo", tags=tags, response_model=TeamInDB)

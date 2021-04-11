@@ -22,6 +22,7 @@ class Team(BaseTeam):
         schema_extra = {
             "example": {
                 "team_name": "Example Team",
+                "discord_id": 123456789,
                 "elo": 1500
             }
         }

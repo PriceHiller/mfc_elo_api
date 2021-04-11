@@ -64,7 +64,8 @@ async def get_team(
 async def create_team(team: SchemaTeam):
     query = ModelTeam.__table__.insert().values(
         team_name=team.team_name,
-        elo=team.elo
+        elo=team.elo,
+        discord_id=team.discord_id
     )
 
     try:
@@ -85,6 +86,16 @@ async def get_teams() -> list[SchemaTeamInDB]:
     query: ModelTeam.__table__.select = ModelTeam.__table__.select()
 
     return await get_team(query=query, fetch_one=False)
+
+
+async def get_team_by_discord_id(discord_id: int) -> SchemaTeamInDB:
+    if result := await get_team(match_schema=ModelTeam.discord_id, match_str=discord_id, fetch_one=True):
+        return result
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Could not find team with discord id: {discord_id}"
+        )
 
 
 async def get_team_by_name(team_name: str) -> SchemaTeamInDB:
