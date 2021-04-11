@@ -6,6 +6,8 @@ from fastapi import Query
 from fastapi import status
 from fastapi.exceptions import HTTPException
 
+from pydantic import UUID4
+
 from API.Database.Crud.User.user import check_user
 from API.Auth import JWTBearer
 
@@ -85,7 +87,7 @@ class MordhauTeam(BaseEndpoint):
 
     @staticmethod
     @route.post("/delete", tags=tags, response_model=BaseSchema)
-    async def delete(team_id: str = Query(..., min_length=32, max_length=36), auth=Depends(JWTBearer())):
+    async def delete(team_id: UUID4, auth=Depends(JWTBearer())):
         await check_user(token=auth[0], user_id=auth[-1])
         if team_id and await get_team_by_id(team_id):
             log.info(f"User id \"{auth[-1]}\" issued a delete of Mordhau Team id \"{team_id}\"")
@@ -95,7 +97,7 @@ class MordhauTeam(BaseEndpoint):
     @staticmethod
     @route.post("/update-elo", tags=tags, response_model=TeamInDB)
     async def update_elo(new_elo: int,
-                         team_id: str = Query(..., min_length=32, max_length=36),
+                         team_id: UUID4,
                          auth=Depends(JWTBearer())):
         await check_user(token=auth[0], user_id=auth[-1])
         if team_id and await get_team_by_id(team_id):
@@ -104,12 +106,14 @@ class MordhauTeam(BaseEndpoint):
 
     @staticmethod
     @route.post("/add-player-to-team", tags=tags, response_model=TeamInDB)
-    async def add_player_to_team(player_id, team_id, auth=Depends(JWTBearer())):
+    async def add_player_to_team(player_id: UUID4,
+                                 team_id: UUID4,
+                                 auth=Depends(JWTBearer())):
         await check_user(token=auth[0], user_id=auth[-1])
         return await add_player_to_team(player_id, team_id)
 
     @staticmethod
     @route.post("/remove-player-from-team", tags=tags, response_model=TeamInDB)
-    async def remove_player_from_team(player_id, team_id, auth=Depends(JWTBearer())):
+    async def remove_player_from_team(player_id: UUID4, team_id: UUID4, auth=Depends(JWTBearer())):
         await check_user(token=auth[0], user_id=auth[-1])
         return await remove_player_from_team(player_id, team_id)

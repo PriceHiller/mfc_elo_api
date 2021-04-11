@@ -17,6 +17,7 @@ from API.Endpoints import BaseEndpoint
 
 from API.Database.Crud.Mordhau.player import get_players
 from API.Database.Crud.Mordhau.player import get_player_by_id
+from API.Database.Crud.Mordhau.player import get_player_by_discord_id
 from API.Database.Crud.Mordhau.player import get_player_by_name
 from API.Database.Crud.Mordhau.player import create_player
 from API.Database.Crud.Mordhau.player import delete_player
@@ -71,6 +72,11 @@ class MordhauPlayer(BaseEndpoint):
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Player with playfab id {playfab_id} not found"
         )
+
+    @staticmethod
+    @route.get("/discord-id", tags=tags, response_model=PlayerInDB)
+    async def discord_id(discord_id: int):
+        return await get_player_by_discord_id(discord_id)
 
     @staticmethod
     @route.post("/create", tags=tags, response_model=BaseSchema)

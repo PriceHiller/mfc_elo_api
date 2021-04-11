@@ -61,6 +61,20 @@ async def get_player_by_id(id) -> SchemaPlayerInDB:
         )
 
 
+async def get_player_by_discord_id(discord_id: int) -> SchemaPlayerInDB:
+    query: ModelPlayer.__table__.select = ModelPlayer.__table__.select().where(
+        ModelPlayer.discord_id == discord_id
+    )
+
+    if result := await db.fetch_one(query):
+        return SchemaPlayerInDB(**dict(result))
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Could not find player: {discord_id}",
+        )
+
+
 async def get_player_by_playfab_id(playfab_id) -> SchemaPlayerInDB:
     query: ModelPlayer.__table__.select = ModelPlayer.__table__.select().where(
         ModelPlayer.playfab_id == playfab_id
