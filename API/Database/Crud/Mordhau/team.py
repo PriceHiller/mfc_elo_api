@@ -124,7 +124,6 @@ async def update_name(team_id, new_name: str) -> SchemaTeamInDB:
     ).values(team_name=new_name.lower())
 
     await db.execute(query)
-
     return await get_team_by_name(new_name.lower())
 
 

@@ -104,7 +104,7 @@ class MordhauPlayer(BaseEndpoint):
         )
 
     @staticmethod
-    @route.post("/update-discord-id", tags=tags)
+    @route.post("/update-discord-id", tags=tags, response_model=BaseSchema)
     async def update_discord_id(discord_id: int = Query(..., gt=9999999999999999),
                                 # That defines the minimum value for a discord id
                                 player_id: str = Query(..., min_length=32, max_length=36),
@@ -113,7 +113,10 @@ class MordhauPlayer(BaseEndpoint):
         if await get_player_by_id(player_id):
             log.info(f"User ID \"{auth[-1]}\" updated player_id \"{player_id}\" discord id to \"{discord_id}")
             await update_player_discord_id(player_id, discord_id)
-            return {"Updated Discord ID": player_id}
+            return BaseSchema(
+                message="Updated discord id for " + player_id,
+                extra=[{"discord_id": discord_id, "player_id": player_id}]
+            )
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Player {player_id} could not be found"
