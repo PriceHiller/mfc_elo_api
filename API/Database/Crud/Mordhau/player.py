@@ -114,6 +114,12 @@ async def update_player_discord_id(player_id, new_discord_id):
 
     return await db.execute(query)
 
+async def update_player_name(player_id, name):
+    query: ModelPlayer.__table__.update = ModelPlayer.__table__.update().where(
+        ModelPlayer.id == player_id
+    ).values(player_name=name)
+
+    return await db.execute(query)
 
 async def make_ambassador(player_id) -> SchemaPlayerInDB:
     player = await get_player_by_id(player_id)

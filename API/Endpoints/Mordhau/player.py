@@ -25,6 +25,7 @@ from API.Database.Crud.Mordhau.player import update_player_discord_id
 from API.Database.Crud.Mordhau.player import get_player_by_playfab_id
 from API.Database.Crud.Mordhau.player import make_ambassador
 from API.Database.Crud.Mordhau.player import remove_ambassador
+from API.Database.Crud.Mordhau.player import update_player_name
 
 from API.Schemas.Mordhau.player import Player
 from API.Schemas.Mordhau.player import PlayerInDB
@@ -105,22 +106,34 @@ class MordhauPlayer(BaseEndpoint):
 
     @staticmethod
     @route.post("/update-discord-id", tags=tags, response_model=BaseSchema)
-    async def update_discord_id(discord_id: int = Query(..., gt=9999999999999999),
+    async def update_discord_id(player_id: UUID4,
                                 # That defines the minimum value for a discord id
-                                player_id: str = Query(..., min_length=32, max_length=36),
+                                discord_id: int = Query(..., gt=9999999999999999),
                                 auth=Depends((JWTBearer()))):
         await check_user(token=auth[0], user_id=auth[-1])
         if await get_player_by_id(player_id):
             log.info(f"User ID \"{auth[-1]}\" updated player_id \"{player_id}\" discord id to \"{discord_id}")
             await update_player_discord_id(player_id, discord_id)
             return BaseSchema(
-                message="Updated discord id for " + player_id,
-                extra=[{"discord_id": discord_id, "player_id": player_id}]
+                message="Updated discord id for " + str(player_id),
+                extra=[{"discord_id": discord_id, "player_id": str(player_id)}]
             )
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Player {player_id} could not be found"
         )
+
+    @staticmethod
+    @route.post("/update-name", tags=tags, response_model=BaseSchema)
+    async def update_name(name: str, player_id: UUID4, auth=Depends(JWTBearer())):
+        await check_user(token=auth[0], user_id=auth[-1])
+        if await get_player_by_id(player_id):
+            log.info(f"User ID \"{auth[-1]}\" updated player_id \"{player_id}\" name to \"{name}\"")
+            await update_player_name(player_id, name)
+            return BaseSchema(
+                message="Updated name for " + str(player_id),
+                extra=[{"name": name, "player_id": player_id}]
+            )
 
     @staticmethod
     @route.post("/make-ambassador", tags=tags, response_model=BaseSchema)
