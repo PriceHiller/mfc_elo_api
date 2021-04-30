@@ -78,4 +78,4 @@ class Match(BaseEndpoint):
     async def calculate_match_elo(match_id: UUID4, auth=Depends(JWTBearer())):
         await check_user(token=auth[0], user_id=auth[-1])
         calculated_elo = await calculate_elo(match_id)
-        return BaseSchema(message="Updated elo.", extra=[calculated_elo])
+        return BaseSchema(message="Updated elo.", extra=[{"New ELO": calculated_elo}])

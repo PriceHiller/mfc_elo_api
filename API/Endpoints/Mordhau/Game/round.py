@@ -77,18 +77,8 @@ class Round(BaseEndpoint):
         )
 
     @staticmethod
-    @route.get("/round-played-id", tags=tags, response_model=RoundPlayerInDB)
-    async def get_round_played_by_id(round_player_id):
-        if result := await get_round_played_by_id(round_player_id):
-            return result
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Player rounds not found for id {round_player_id}"
-        )
-
-    @staticmethod
-    @route.get("/round-player-id", tags=tags, response_model=RoundPlayerInDB)
-    async def get_rounds_by_player_id(round_player_id):
+    @route.get("/rounds-played-by-player-id", tags=tags, response_model=list[RoundPlayerInDB])
+    async def get_round_played_by_player_id(round_player_id):
         if result := await get_round_player_by_id(round_player_id):
             return result
         raise HTTPException(

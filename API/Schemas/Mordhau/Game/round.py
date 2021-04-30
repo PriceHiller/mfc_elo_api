@@ -56,7 +56,6 @@ class CreateRoundPlayers(BaseSchema):
                 "round_players": [CreateRoundPlayer.Config.schema_extra["example"]]
             }
         }
-
     round_players: List[CreateRoundPlayer]
 
 

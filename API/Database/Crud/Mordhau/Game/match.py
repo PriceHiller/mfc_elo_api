@@ -103,7 +103,7 @@ async def create_match(match: SchemaMatch):
     return await db.execute(query)
 
 
-async def calculate_elo(match_id) -> dict[str, float]:
+async def calculate_elo(match_id) -> [dict[str, float], str]:
     match = await get_match(match_schema=ModelMatch.id, match_str=match_id, fetch_one=True)
     if not match:
         raise HTTPException(
@@ -126,8 +126,11 @@ async def calculate_elo(match_id) -> dict[str, float]:
     
     team1_elo = ELOTeam(elo=team1.elo, rounds_won=team1_rounds_won)
     team2_elo = ELOTeam(elo=team2.elo, rounds_won=team2_rounds_won)
-    
-    new_elo = ELO().calculate(team1_elo, team2_elo)
+
+    if team1_rounds_won > 0 and team2_rounds_won > 0:
+        new_elo = ELO().calculate(team1_elo, team2_elo)
+    else:
+        return "Unable to calculate elo, scores were the same!"
     
     await update_elo(match.team1_id, round(new_elo["team1"]))
     await update_elo(match.team2_id, round(new_elo["team2"]))
