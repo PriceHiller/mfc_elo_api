@@ -22,11 +22,9 @@ workflow: { rules: [
 ]}
 
 include: [
-    { project: "CI-CD/IO", file: "/IO-Code-Quality.Yaml",               ref: "Development" },
     { project: "CI-CD/IO", file: "/IO-Secrets-Detection.Yaml",          ref: "Development" },
     { project: "CI-CD/IO", file: "/IO-Pre-Release.Yaml",                ref: "Development" },
     { project: "CI-CD/IO", file: "/IO-Release.Yaml",                    ref: "Development" },
-    { project: "CI-CD/IO", file: "/IO-PY-Package.Yaml",                 ref: "Development" },
     { project: "CI-CD/IO", file: "/IO-Git-Leaks.Yaml",                  ref: "Development" }
 ]
 
@@ -83,10 +81,6 @@ default: { image: { name: "python:alpine" } }
 # Pipeline Entry Point
 # ------------------------------------------------------------------------
 
-# - - - - - - - - -
-# Executable Jobs
-# - - - - - - - - -
-
 Initialization:
     stage: Setup
     artifacts: { paths: [ "Artifact" ], expire_in: "1 hour" }
@@ -107,34 +101,6 @@ Initialization:
         - touch Database/.env   || true
         - mkdir -p ./Artifact   || true
         - python setup.py build || true
-
-Compile (Dry):
-    stage: UAT
-    rules: *UAT-Trigger
-    needs: [ { job: Initialization, artifacts: True } ]
-    allow_failure: True
-    before_script: [ *GCC, *Python-3, *Alpine ]
-    script:
-        - python setup.py build --dry-run
-
-Archive (Dry):
-    stage: UAT
-    rules: *UAT-Trigger
-    needs: [ { job: Initialization, artifacts: True } ]
-    allow_failure: True
-    before_script: [ *GCC, *Python-3, *Alpine ]
-    script:
-        - python setup.py sdist --dry-run
-
-Install (Dry):
-    stage: UAT
-    rules: *UAT-Trigger
-    needs:  [ { job: Initialization, artifacts: True } ]
-    variables: { GIT_STRATEGY: "clone" }
-    allow_failure: True
-    before_script: [ *GCC, *Python-3, *Alpine ]
-    script:
-        - python setup.py install --dry-run
 
 Compile:
     stage: Package
