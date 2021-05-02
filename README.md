@@ -81,6 +81,16 @@ On Windows? Go die.
 It is *highly* recommended that a `.env` file is created within the `API` directory, otherwise all of your environment
 variables will need to be exported by default into your environment
 
+A important note:
+
+A default user *is* created for you on the initial run of the API:
+
+| Username | Password
+| :---     | :---
+| admin    | Admin1234@
+
+It is recommended that you update that user's password once the API is ready to go.
+
 ## SSL Configuration
 
 To generate your key use the following:
