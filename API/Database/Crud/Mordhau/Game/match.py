@@ -97,7 +97,8 @@ async def get_matches() -> list[SchemaMatchInDB]:
 async def create_match(match: SchemaMatch):
     query: ModelMatch.__table__.insert = ModelMatch.__table__.insert().values(
         team1_id=match.team1_id,
-        team2_id=match.team2_id
+        team2_id=match.team2_id,
+        elo_calculated=False
     )
 
     return await db.execute(query)
@@ -127,12 +128,21 @@ async def calculate_elo(match_id) -> [dict[str, float], str]:
     team1_elo = ELOTeam(elo=team1.elo, rounds_won=team1_rounds_won)
     team2_elo = ELOTeam(elo=team2.elo, rounds_won=team2_rounds_won)
 
-    if team1_rounds_won > 0 and team2_rounds_won > 0:
+    if team1_rounds_won != team2_rounds_won:
         new_elo = ELO().calculate(team1_elo, team2_elo)
     else:
-        return "Unable to calculate elo, scores were the same!"
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Unable to calculate elo, scores were the same!"
+        )
     
     await update_elo(match.team1_id, round(new_elo["team1"]))
     await update_elo(match.team2_id, round(new_elo["team2"]))
+
+    query: ModelMatch.__table__.update = ModelMatch.__table__.update().where(
+        ModelMatch.id == match_id,
+    ).values(elo_calculated=True)
+
+    await db.execute(query)
 
     return new_elo

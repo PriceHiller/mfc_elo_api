@@ -29,4 +29,9 @@ class Match(ModelBase, AlcBase):
         nullable=True,
         index=True
     )
+    elo_calculated = sqlalchemy.Column(
+        sqlalchemy.Boolean,
+        nullable=False,
+        index=True
+    )
     sets = relationship(Set, cascade="all, delete", passive_deletes=True)

@@ -20,7 +20,6 @@ class BaseDB:
     @classmethod
     def create_tables(cls):
         engine = sqlalchemy.create_engine(str(cls.SQLALCHEMY_DATABASE_URL))
-        engine.execute(r'CREATE EXTENSION IF NOT EXISTS "uuid-ossp";')
         metadata.create_all(engine)
         for subclass in ModelBase.__subclasses__():
             subclass.metadata.create_all(engine)

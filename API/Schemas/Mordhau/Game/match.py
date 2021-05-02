@@ -26,8 +26,7 @@ class Match(BaseMatch):
 
 
 class BaseMatchInDB(Match, BaseInDB):
-    ...
-
+    elo_calculated: bool
 
 class MatchInDB(BaseMatchInDB):
     sets: List[SetInDB]
