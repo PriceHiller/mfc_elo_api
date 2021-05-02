@@ -204,9 +204,9 @@ All jwt variables are preceded by `JWT_`
 
 All sql variables are preceded by `SQL_`
 
-| Key        | Example Value                                 | Description
-| :---       | :---                                          | :---
-| SQL_DB_URL | `postgresql://username@0.0.0.0:5432/Database` | The database connection url, *only* supports postgresql due to the need for postgresql UUID functions
+| Key        | Example Value                                          | Description
+| :---       | :---                                                   | :---
+| SQL_DB_URL | `postgresql://username:password@0.0.0.0:5432/Database` | The database connection url, *only* supports postgresql due to the need for postgresql UUID functions
 
 ## Uvicorn Variables
 
