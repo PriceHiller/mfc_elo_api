@@ -1,0 +1,42 @@
+; git config --global credential.
+; git config --global credential.helper store
+; git config --global credential.username Segmentational
+; git config pull.rebase true
+
+[core]
+ignorecase  = false
+credential  = --help
+
+[credential]
+helper      = store
+
+[filter "lfs"]
+clean       = git-lfs clean -- %f
+smudge      = git-lfs smudge -- %f
+process     = git-lfs filter-process
+
+[pager]
+paginate    = false
+
+[submodule]
+recurse     = true
+fetchJobs   = 0
+
+[merge]
+autoStash   = true
+verbosity   = 5
+
+[rebase]
+autostash   = true
+stat        = true
+
+[status]
+branch                  = true
+showStash               = true
+showUntrackedFiles      = all
+showSubmoduleSummary    = true
+submoduleSummary        = true
+
+[init]
+defaultBranch = Development
+
