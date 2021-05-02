@@ -1,5 +1,9 @@
 from typing import List
+from typing import Union
 from typing import Optional
+
+from pydantic import UUID4
+from pydantic import Field
 
 from API.Schemas import BaseInDB
 from API.Schemas import BaseSchema
@@ -18,6 +22,7 @@ class Team(BaseTeam):
         schema_extra = {
             "example": {
                 "team_name": "Example Team",
+                "discord_id": 123456789,
                 "elo": 1500
             }
         }

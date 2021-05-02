@@ -6,7 +6,6 @@ from asyncpg import DataError
 from API.Database import BaseDB
 from API.Database.Models.Mordhau.Game.round import Round as ModelRound
 from API.Database.Crud.Mordhau.Game.round_player import get_round_players_by_round_id
-from API.Database.Crud.Mordhau.Game.round_player import create_round_player
 
 from API.Schemas.Mordhau.Game.round import RoundInDB as SchemaRoundInDB
 from API.Schemas.Mordhau.Game.round import Round as SchemaRound

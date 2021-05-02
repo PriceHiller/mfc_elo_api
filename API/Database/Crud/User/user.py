@@ -10,7 +10,7 @@ from API.Database.Models.User.user import User as ModelUser
 from API.Database import BaseDB
 
 from API.Schemas.User.user import UserCreate as SchemaUserCreate
-from API.Schemas.User.user import UserInDBExtra as SchemaUserInDBExtra
+from API.Schemas.User.user import UserInDB as SchemaUserInDB
 from API.Schemas.User.user import UserInDBPassword as SchemaUserInDBPassword
 
 from .token import create_token
@@ -63,7 +63,7 @@ async def get_user_by_username(username: str) -> SchemaUserInDBPassword:
         )
 
 
-async def get_user_by_id(id) -> SchemaUserInDBExtra:
+async def get_user_by_id(id) -> SchemaUserInDB:
     user_query: ModelUser.__table__.select = ModelUser.__table__.select().where(
         ModelUser.id == id
     )
@@ -73,7 +73,7 @@ async def get_user_by_id(id) -> SchemaUserInDBExtra:
         result_dict["id"] = str(result_dict["id"])
         token = await get_token_by_user_id(id, fetch_one=True)
         result_dict["token"] = token
-        return SchemaUserInDBPassword(**result_dict)
+        return SchemaUserInDB(**result_dict)
     else:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -81,7 +81,7 @@ async def get_user_by_id(id) -> SchemaUserInDBExtra:
         )
 
 
-async def check_user(token=None, user_id: str = None, user: SchemaUserInDBExtra = None):
+async def check_user(token=None, user_id: str = None, user: SchemaUserInDB = None):
     if token:
         if not await get_token_by_token(token.credentials):
             raise HTTPException(

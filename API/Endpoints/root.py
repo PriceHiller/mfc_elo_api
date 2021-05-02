@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+from fastapi.responses import RedirectResponse
 
 from API.Endpoints import BaseEndpoint
 
@@ -9,4 +10,4 @@ class Root(BaseEndpoint):
     @staticmethod
     @route.get("/", tags=["root"])
     async def root():
-        return "Welcome to the root page"
+        return RedirectResponse(url="/docs")

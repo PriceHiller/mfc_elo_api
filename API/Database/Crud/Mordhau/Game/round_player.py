@@ -14,10 +14,6 @@ from API.Schemas.Mordhau.Game.round import CreateRoundPlayers as SchemaCreateRou
 db = BaseDB.db
 
 
-async def Segmentational():
-    ...
-
-
 async def get_round_player(
         match_schema=None,
         match_str=None,
@@ -67,7 +63,7 @@ async def get_round_players_by_round_id(round_id):
 
 async def get_round_player_by_id(id):
     try:
-        return await get_round_player(ModelRoundPlayer.player_id, id, fetch_one=True)
+        return await get_round_player(ModelRoundPlayer.player_id, id, fetch_one=False)
     except DataError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -107,12 +103,19 @@ async def create_round_player(round_player: SchemaCreateRoundPlayer) -> UUID4:
         round_id=round_player.round_id
     )
 
-    return await db.execute(query)
+    try:
+        return await db.execute(query)
+    except DataError as error:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(error)
+        )
 
 
 async def create_all_round_players(round_all: SchemaCreateRoundPlayers):
     player_ids = []
     for player in round_all.round_players:
+        print(player)
         player_ids.append(await create_round_player(player))
 
     return player_ids

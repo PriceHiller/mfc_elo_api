@@ -12,10 +12,12 @@ from API.Schemas.Mordhau.Game.round import RoundInDB
 
 class BaseSet(BaseSchema):
     map: str
-    match_id: Union[UUID4, str, int] = Field(..., minlength=32, maxlength=36)
+    match_id: Union[UUID4, str, int]
 
 
 class Set(BaseSet):
+
+    match_id: UUID4
     class Config:
         schema_extra = {
             "example": {

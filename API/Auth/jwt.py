@@ -73,7 +73,7 @@ class JWTBearer(HTTPBearer):
         log.info(f"Issued a token for user_id: \"{user_id}\" that expires \"{expiry_time}\"")
         payload = {
             "user_id": str(user_id),
-            "expires": expiry_time
+            "expires": expiry_time,
         }
         encoded_token = jwt.encode(payload, str(cls.JWT_SECRET), algorithm=cls.JWT_ALGORITHM)
         if remove_bearer:
@@ -88,8 +88,12 @@ class JWTBearer(HTTPBearer):
         token = token.replace("Bearer ", "")
         try:
             decoded_token = jwt.decode(token, str(cls.JWT_SECRET), algorithms=[cls.JWT_ALGORITHM])
-            expiry_time = datetime.fromisoformat(decoded_token["expires"])
-            return decoded_token if expiry_time >= datetime.now(tz=cls.timezone) else None
+            # I have decided to ditch the expirations. Seeing as there is already DB tracking and a revocation endpoint,
+            # I have made the decision to yank this and leave it unused. Simplifies other codebases.
+            #
+            # expiry_time = datetime.fromisoformat(decoded_token["expires"])
+            # return decoded_token if expiry_time >= datetime.now(tz=cls.timezone) else None
+            return decoded_token
         except Exception as error:
             log.error(error)
             return {}

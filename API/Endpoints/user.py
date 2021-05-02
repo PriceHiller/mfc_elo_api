@@ -11,7 +11,7 @@ from API.Endpoints import BaseEndpoint
 
 from API.Schemas import BaseSchema
 from API.Schemas.User.user import UserCreate
-from API.Schemas.User.user import UserInDBExtra
+from API.Schemas.User.user import UserInDB
 
 from API.Auth import JWTBearer
 from API.Auth import verify_password
@@ -43,8 +43,8 @@ class User(BaseEndpoint):
         )
 
     @staticmethod
-    @route.post("/login", tags=tags, response_model=UserInDBExtra)
-    async def login_user(response: Response, user: UserCreate) -> UserInDBExtra:
+    @route.post("/login", tags=tags, response_model=UserInDB)
+    async def login_user(response: Response, user: UserCreate) -> UserInDB:
         if existing_user := await get_user_by_username(username=user.username):
             if existing_user.username == user.username and \
                     verify_password(user.password, existing_user.hashed_password):
@@ -59,10 +59,10 @@ class User(BaseEndpoint):
                     token = await get_token_by_id(token_id, fetch_one=True)
                     existing_user.token = token
                     existing_user = \
-                        UserInDBExtra(
+                        UserInDB(
                             **dict(existing_user),
                         )
-                user = UserInDBExtra(
+                user = UserInDB(
                     **dict(existing_user),
                 )
                 deleted_token = await JWTBearer.remove_cookie(response)
@@ -76,8 +76,8 @@ class User(BaseEndpoint):
                             detail="Incorrect Login Credentials")
 
     @staticmethod
-    @route.post("/verify", tags=tags, response_model=UserInDBExtra)
-    async def verify_logged_in(auth=Depends(JWTBearer())) -> UserInDBExtra:
+    @route.post("/verify", tags=tags, response_model=UserInDB)
+    async def verify_logged_in(auth=Depends(JWTBearer())) -> UserInDB:
         user = await check_user(token=auth[0], user_id=auth[-1])
         if user.is_active:
             return user

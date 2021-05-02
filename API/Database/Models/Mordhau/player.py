@@ -18,3 +18,7 @@ class Player(ModelBase, AlcBase):
         nullable=True,
         index=True
     )
+    ambassador = sqlalchemy.Column(
+        sqlalchemy.Boolean,
+        index=True
+    )

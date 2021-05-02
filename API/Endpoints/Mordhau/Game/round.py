@@ -77,18 +77,8 @@ class Round(BaseEndpoint):
         )
 
     @staticmethod
-    @route.get("/round-played-id", tags=tags, response_model=RoundPlayerInDB)
-    async def get_round_played_by_id(round_player_id):
-        if result := await get_round_played_by_id(round_player_id):
-            return result
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Player rounds not found for id {round_player_id}"
-        )
-
-    @staticmethod
-    @route.get("/round-player-id", tags=tags, response_model=RoundPlayerInDB)
-    async def get_rounds_by_player_id(round_player_id):
+    @route.get("/rounds-played-by-player-id", tags=tags, response_model=list[RoundPlayerInDB])
+    async def get_round_played_by_player_id(round_player_id):
         if result := await get_round_player_by_id(round_player_id):
             return result
         raise HTTPException(
@@ -102,13 +92,7 @@ class Round(BaseEndpoint):
         return await get_round_players()
 
     @staticmethod
-    @route.post("/create-round-player", tags=tags, response_model=BaseSchema)
-    async def create_round_player(round_player: CreateRoundPlayer, auth=Depends(JWTBearer())):
-        await check_user(token=auth[0], user_id=auth[-1])
-        return await create_round_player(round_player)
-
-    @staticmethod
-    @route.post("/create-all-round-players", tags=tags, response_model=BaseSchema)  # Shit endpoint name, pls god rename
+    @route.post("/create-round-players", tags=tags, response_model=BaseSchema)  # Shit endpoint name, pls god rename
     async def create_round_all(round_players: CreateRoundPlayers, auth=Depends(JWTBearer())):
         await check_user(token=auth[0], user_id=auth[-1])
         round_player_ids = [str(round_player_id) for round_player_id in await create_all_round_players(round_players)]

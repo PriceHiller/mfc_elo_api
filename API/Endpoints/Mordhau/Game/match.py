@@ -66,7 +66,11 @@ class Match(BaseEndpoint):
         log.info(f"User \"{auth[-1]}\" created a match \"{match_id}\"")
         return BaseSchema(
             message=f"Created match with id: {match_id}",
-            extra=[{"match id": match_id}]
+            extra=[
+                {
+                    "match_id": match_id
+                }
+            ]
         )
 
     @staticmethod
@@ -74,4 +78,4 @@ class Match(BaseEndpoint):
     async def calculate_match_elo(match_id: UUID4, auth=Depends(JWTBearer())):
         await check_user(token=auth[0], user_id=auth[-1])
         calculated_elo = await calculate_elo(match_id)
-        return BaseSchema(message="Updated elo.", extra=[calculated_elo])
+        return BaseSchema(message="Updated elo.", extra=[{"New ELO": calculated_elo}])

@@ -2,7 +2,6 @@ from fastapi.exceptions import HTTPException
 from fastapi import status
 
 from asyncpg.exceptions import UniqueViolationError
-from databases.backends.postgres import Record
 
 from API.Database.Models.Mordhau.player import Player as ModelPlayer
 from API.Database import BaseDB
@@ -62,6 +61,20 @@ async def get_player_by_id(id) -> SchemaPlayerInDB:
         )
 
 
+async def get_player_by_discord_id(discord_id: int) -> SchemaPlayerInDB:
+    query: ModelPlayer.__table__.select = ModelPlayer.__table__.select().where(
+        ModelPlayer.discord_id == discord_id
+    )
+
+    if result := await db.fetch_one(query):
+        return SchemaPlayerInDB(**dict(result))
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Could not find player: {discord_id}",
+        )
+
+
 async def get_player_by_playfab_id(playfab_id) -> SchemaPlayerInDB:
     query: ModelPlayer.__table__.select = ModelPlayer.__table__.select().where(
         ModelPlayer.playfab_id == playfab_id
@@ -72,7 +85,7 @@ async def get_player_by_playfab_id(playfab_id) -> SchemaPlayerInDB:
     else:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Could not find player: {id}",
+            detail=f"Could not find player: {playfab_id}",
         )
 
 
@@ -100,3 +113,35 @@ async def update_player_discord_id(player_id, new_discord_id):
     ).values(discord_id=new_discord_id)
 
     return await db.execute(query)
+
+async def update_player_name(player_id, name):
+    query: ModelPlayer.__table__.update = ModelPlayer.__table__.update().where(
+        ModelPlayer.id == player_id
+    ).values(player_name=name)
+
+    return await db.execute(query)
+
+async def make_ambassador(player_id) -> SchemaPlayerInDB:
+    player = await get_player_by_id(player_id)
+    if player.team_id:
+        query: ModelPlayer.__table__.update = ModelPlayer.__table__.update().where(
+            ModelPlayer.id == player_id
+        ).values(ambassador=True)
+
+        await db.execute(query)
+        return player
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Player is not on a team so they cannot be an ambassador."
+        )
+
+
+async def remove_ambassador(player_id) -> SchemaPlayerInDB:
+    player = await get_player_by_id(player_id)
+    query: ModelPlayer.__table__.update = ModelPlayer.__table__.update().where(
+        ModelPlayer.id == player_id
+    ).values(ambassador=False)
+
+    await db.execute(query)
+    return player

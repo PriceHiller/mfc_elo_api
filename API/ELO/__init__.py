@@ -86,7 +86,7 @@ class ELO:
 
 
 if __name__ == "__main__":
-    team1 = Team(elo=1500, rounds_won=3)
-    team2 = Team(elo=1400, rounds_won=1)
+    team1 = Team(elo=2022, rounds_won=10)
+    team2 = Team(elo=2087, rounds_won=6)
 
     print(ELO().calculate(team1, team2))

@@ -43,14 +43,10 @@ class BaseUserInDB(BaseUser, BaseInDB):
 
 
 class UserInDB(BaseUserInDB):
-    ...
-
-
-class UserInDBExtra(UserInDB):
     token: Optional[TokenInDB] = None
     email: Optional[str] = None
     is_active: bool
 
 
-class UserInDBPassword(UserInDBExtra):
+class UserInDBPassword(UserInDB):
     hashed_password: str

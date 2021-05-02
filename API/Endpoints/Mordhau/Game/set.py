@@ -58,15 +58,15 @@ class Set(BaseEndpoint):
 
     @staticmethod
     @route.post("/create-set", tags=tags, response_model=BaseSchema)
-    async def create_set(map_name: str, match_id: UUID4, auth=Depends(JWTBearer())):
+    async def create_set(input_set: SchemaSet, auth=Depends(JWTBearer())):
         await check_user(token=auth[0], user_id=auth[-1])
-        set_id = await create_set(SchemaSet(match_id=match_id, map=map_name))
-        log.info(f"User \"{auth[-1]}\" created a set \"{set_id}\" under match \"{match_id}\"")
+        set_id = await create_set(SchemaSet(match_id=input_set.match_id, map=input_set.map))
+        log.info(f"User \"{auth[-1]}\" created a set \"{set_id}\" under match \"{input_set.match_id}\"")
         return BaseSchema(
-            message=f"Created a set {set_id} under match {match_id}",
+            message=f"Created a set {set_id} under match {input_set.match_id}",
             extra=[
                 {
-                    "set id": set_id
+                    "set_id": set_id
                 }
             ]
         )
