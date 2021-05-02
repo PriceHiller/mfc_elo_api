@@ -105,7 +105,7 @@ Initialization:
 Compile:
     stage: Package
     needs: [ { job: Initialization, artifacts: True } ]
-    artifacts: { paths: [ "Artifact/Distribution" ] }
+    artifacts: { paths: [ "dist/MFC_API-0.2.6-py3-none-any.whl" ] }
     before_script: [ *GCC, *Python-3, *Alpine ]
     resource_group: Distributable
     script:
