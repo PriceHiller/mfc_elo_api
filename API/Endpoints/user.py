@@ -4,6 +4,7 @@ from fastapi import APIRouter
 from fastapi import Depends
 from fastapi import status
 from fastapi import Response
+from fastapi import Query
 from fastapi.exceptions import HTTPException
 from pydantic import UUID4
 
@@ -19,6 +20,7 @@ from API.Auth import verify_password
 from API.Database.Crud.User.user import create_user
 from API.Database.Crud.User.user import get_user_by_username
 from API.Database.Crud.User.user import check_user
+from API.Database.Crud.User.user import update_password
 
 from API.Database.Crud.User.token import create_token, get_token_by_id
 from API.Database.Crud.User.token import get_token_by_token
@@ -34,20 +36,35 @@ class User(BaseEndpoint):
 
     @staticmethod
     @route.post("/signup", tags=tags, response_model=BaseSchema)
-    async def create_user(user: UserCreate) -> BaseSchema:
+    async def create_user(user: UserCreate, auth=Depends(JWTBearer())) -> BaseSchema:
+        known_user = await check_user(token=auth[0], user_id=auth[-1])
         user_id = str(await create_user(user=user))
-        log.info(f"The user \"{user.username}\" was created with id \"{user_id}\"")
+        log.info(f"The user \"{user.username}\" was created with id \"{user_id}\" by \"{known_user.username}\", id: "
+                 f"\"{known_user.id}\"")
         return BaseSchema(
             message="User Successfully Created",
             extra=[{"User ID": user_id}]
         )
 
     @staticmethod
+    @route.post("/update-password", tags=tags, response_model=BaseSchema)
+    async def update_password(
+            password: str = Query(
+                ...,
+                min_length=8,
+                regex=R"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
+            ),
+            auth=Depends((JWTBearer()))) -> BaseSchema:
+        known_user = await check_user(token=auth[0], user_id=auth[-1])
+        await update_password(known_user, password)
+        return BaseSchema(message="Successfully updated password", extra=[])
+
+    @staticmethod
     @route.post("/login", tags=tags, response_model=UserInDB)
-    async def login_user(response: Response, user: UserCreate) -> UserInDB:
-        if existing_user := await get_user_by_username(username=user.username):
-            if existing_user.username == user.username and \
-                    verify_password(user.password, existing_user.hashed_password):
+    async def login_user(response: Response, username: str, password: str) -> UserInDB:
+        if existing_user := await get_user_by_username(username=username):
+            if existing_user.username == username and \
+                    verify_password(password, existing_user.hashed_password):
                 await check_user(user=existing_user)
                 if existing_user.token:
                     if not JWTBearer.verify_jwt(existing_user.token.token):

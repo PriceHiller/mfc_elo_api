@@ -189,7 +189,7 @@ All logging variables are preceded by log_
 
 | Key             | Example Value | Description
 | :---            | :---          | :---
-| LOG_CONFIG_PATH | /Users/user/MFC_Bot/bot/log_config.yaml | The path (including the name of the file) of your log config.
+| LOG_CONFIG_PATH | /Users/user/mfc_elo_api/log_config.yaml | The path (including the name of the file) of your log config.
 
 ## JWT Variables
 

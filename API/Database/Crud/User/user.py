@@ -30,7 +30,6 @@ async def create_user(user: SchemaUserCreate) -> str:
     query = ModelUser.__table__.insert().values(
         username=user.username,
         hashed_password=get_password_hash(user.password),
-        email=user.email,
         is_active=True,
     )
 
@@ -59,7 +58,7 @@ async def get_user_by_username(username: str) -> SchemaUserInDBPassword:
     else:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Could not find username: {username}",
+            detail=f"Could not find user: {username}",
         )
 
 
@@ -79,6 +78,16 @@ async def get_user_by_id(id) -> SchemaUserInDB:
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Could not find user_id: {id}",
         )
+
+
+async def update_password(user: SchemaUserCreate, password):
+    known_user = await get_user_by_username(user.username)
+
+    query = ModelUser.__table__.update = ModelUser.__table__.update().where(
+        ModelUser.id == known_user.id
+    ).values(hashed_password=get_password_hash(password))
+
+    await db.execute(query)
 
 
 async def check_user(token=None, user_id: str = None, user: SchemaUserInDB = None):

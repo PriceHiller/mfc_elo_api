@@ -24,7 +24,6 @@ class User(BaseUser):
 
 
 class UserCreate(BaseUser):
-    email: Optional[EmailStr] = None
     password: str = Field(min_length=8,
                           regex=R"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$")
 
@@ -32,10 +31,14 @@ class UserCreate(BaseUser):
         schema_extra = {
             "example": {
                 "username": "John Smith",
-                "email": "jsmith@email.com",
                 "password": "SomeSecurePassword4321@"
             }
         }
+
+
+class UpdatePW:
+    password: str = Field(min_length=8,
+                          regex=R"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$")
 
 
 class BaseUserInDB(BaseUser, BaseInDB):

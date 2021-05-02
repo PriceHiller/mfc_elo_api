@@ -12,6 +12,7 @@ from logging import config as log_config
 
 from distutils.util import strtobool
 
+from fastapi import HTTPException
 from starlette.config import Config
 
 from fastapi.responses import ORJSONResponse
@@ -27,7 +28,7 @@ log = logging.getLogger(__name__)
 
 root_path = Path(__file__).parent
 
-config = Config(root_path / ".env", environ=os.environ)
+config = Config(root_path.parent / ".env", environ=os.environ)
 
 
 class BaseApplication:
@@ -55,6 +56,19 @@ class BaseApplication:
         await BaseDB.db.connect()
 
         BaseDB.create_tables()
+
+        from API.Schemas.User.user import UserCreate
+        from API.Database.Crud.User.user import create_user
+
+        admin_user = UserCreate(username="admin",
+                                password="Admin1234@")
+
+        try:
+            await create_user(admin_user)
+        except HTTPException:
+            pass
+
+
 
     @staticmethod
     @app.on_event("shutdown")
