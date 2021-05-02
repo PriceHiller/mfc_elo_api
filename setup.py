@@ -25,28 +25,24 @@ setuptools.setup(
     version=".".join(Version),
     author="Price Hiller",
     author_email="philler3138@gmail.com",
-    download_url="https://gitlab.cloud-technology.io/MFC/MFC-ELO/s",
+    download_url="https://gitlab.cloud-technology.io/MFC/MFC-ELO",
     description="",
     project_urls=URLs,
     long_description="",
     long_description_content_type="text/markdown",
-    url="https://gitlab.cloudhybrid.io/IaC/Cloud-API",
+    url="https://gitlab.cloud-technology.io/MFC/MFC-ELO",
     packages=Packages(),
     classifiers=Classifiers,
     package_data={
-        "API.Database": ["*.db"],
         ".": [
             "setup.*",
-            "*.Yaml",
             "*.cfg",
             "*.md",
-            "Dependencies",
-            "MANIFEST.in",
-            "VERSION",
-        ], "Templates": ["*"],
-        "API.ASGI.Authentication": [".env"],
-        "API.Discord": ["*", "Token"],
-        "Database": [".env"],
+            "requirements.txt",
+            "VERSION"
+        ], "API": [
+            "log_config.yaml"
+        ]
     },
     python_requires=">=3.9",
     include_package_data=True,
