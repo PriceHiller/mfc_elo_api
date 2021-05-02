@@ -129,7 +129,7 @@ async def update_name(team_id, new_name: str) -> SchemaTeamInDB:
 
 async def update_elo(team_id, new_elo: int) -> SchemaTeamInDB:
     query: ModelTeam.__table__.update = ModelTeam.__table__.update().where(
-        ModelTeam.id == team_id
+        ModelTeam.id == team_id,
     ).values(elo=new_elo)
 
     await db.execute(query)
