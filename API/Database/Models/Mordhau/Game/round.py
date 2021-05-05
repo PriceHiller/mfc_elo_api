@@ -27,6 +27,8 @@ class RoundPlayer(ModelBase, AlcBase):
     )
     player_id = sqlalchemy.Column(UUID, sqlalchemy.ForeignKey("mfc_players.id", ondelete="SET NULL"))
     round_id = sqlalchemy.Column(UUID, sqlalchemy.ForeignKey("mfc_rounds.id", ondelete="CASCADE"), index=True)
+    set_id = sqlalchemy.Column(UUID, sqlalchemy.ForeignKey("mfc_sets.id", ondelete="CASCADE"), index=True)
+    match_id = sqlalchemy.Column(UUID, sqlalchemy.ForeignKey("mfc_matches.id", ondelete="CASCADE"), index=True)
 
 
 class Round(ModelBase, AlcBase):
@@ -35,4 +37,5 @@ class Round(ModelBase, AlcBase):
     team1_win = sqlalchemy.Column(sqlalchemy.Boolean, nullable=False, default=False)
     team2_win = sqlalchemy.Column(sqlalchemy.Boolean, nullable=False, default=False)
     set_id = sqlalchemy.Column(UUID, sqlalchemy.ForeignKey("mfc_sets.id", ondelete="CASCADE"), index=True)
+    match_id = sqlalchemy.Column(UUID, sqlalchemy.ForeignKey("mfc_matches.id", ondelete="CASCADE"), index=True)
     round_players = relationship(RoundPlayer, cascade="all, delete", passive_deletes=True)

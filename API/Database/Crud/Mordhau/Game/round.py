@@ -5,7 +5,8 @@ from asyncpg import DataError
 
 from API.Database import BaseDB
 from API.Database.Models.Mordhau.Game.round import Round as ModelRound
-from API.Database.Crud.Mordhau.Game.round_player import get_round_players_by_round_id
+
+from API.Database.Crud.Mordhau.Game.set import get_set_by_id
 
 from API.Schemas.Mordhau.Game.round import RoundInDB as SchemaRoundInDB
 from API.Schemas.Mordhau.Game.round import Round as SchemaRound
@@ -52,6 +53,8 @@ async def get_round(
         result = await db.fetch_all(query)
         if not result:
             return []
+
+    from API.Database.Crud.Mordhau.Game.round_player import get_round_players_by_round_id
 
     if fetch_one:
         round= dict(result)
@@ -106,8 +109,11 @@ async def get_rounds() -> list[SchemaRoundPlayerInDB]:
 
 
 async def create_round(round: SchemaRound):
+    set = await get_set_by_id(round.set_id)
+
     query: ModelRound.__table__.insert = ModelRound.__table__.insert().values(
         set_id=round.set_id,
+        match_id=set.match_id,
         team1_win=round.team1_win,
         team2_win=round.team2_win
     )

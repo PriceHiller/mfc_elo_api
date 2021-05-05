@@ -152,7 +152,7 @@ async def add_player_to_team(player_id, team_id) -> SchemaTeamInDB:
 
 async def remove_player_from_team(player_id, team_id) -> SchemaTeamInDB:
     player = await get_player_by_id(player_id)
-    await get_team_by_id(team_id)
+    team = await get_team_by_id(team_id)
 
     query: ModelPlayer.__table__.update = ModelPlayer.__table__.update().where(
         ModelPlayer.id == player.id
@@ -160,4 +160,4 @@ async def remove_player_from_team(player_id, team_id) -> SchemaTeamInDB:
 
     await db.execute(query)
 
-    return await get_team_by_id(player.id)
+    return await get_team_by_id(team.id)

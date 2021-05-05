@@ -5,7 +5,6 @@ from asyncpg import DataError
 
 from API.Database import BaseDB
 from API.Database.Models.Mordhau.Game.set import Set as ModelSet
-from API.Database.Crud.Mordhau.Game.round import get_rounds_by_set_id
 
 from API.Schemas.Mordhau.Game.set import SetInDB as SchemaSetInDB
 from API.Schemas.Mordhau.Game.set import Set as SchemaSet
@@ -34,6 +33,8 @@ async def get_set(
         result = await db.fetch_all(query)
         if not result:
             return []
+
+    from API.Database.Crud.Mordhau.Game.round import get_rounds_by_set_id
 
     if fetch_one:
         set = dict(result)

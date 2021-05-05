@@ -5,6 +5,7 @@ from pydantic import UUID4
 from asyncpg import DataError
 
 from API.Database import BaseDB
+from API.Database.Crud.Mordhau.Game.round import get_round_by_id
 from API.Database.Models.Mordhau.Game.round import RoundPlayer as ModelRoundPlayer
 
 from API.Schemas.Mordhau.Game.round import RoundPlayerInDB as SchemaRoundPlayerInDB
@@ -92,6 +93,9 @@ async def get_round_player_by_player(player_id: UUID4) -> list[SchemaRoundPlayer
 
 
 async def create_round_player(round_player: SchemaCreateRoundPlayer) -> UUID4:
+
+    _round = await get_round_by_id(round_player.round_id)
+
     query: ModelRoundPlayer.__table__.insert = ModelRoundPlayer.__table__.insert().values(
         score=round_player.score,
         kills=round_player.kills,
@@ -100,7 +104,9 @@ async def create_round_player(round_player: SchemaCreateRoundPlayer) -> UUID4:
         team_number=round_player.team_number,
         team_id=round_player.team_id,
         player_id=round_player.player_id,
-        round_id=round_player.round_id
+        round_id=round_player.round_id,
+        set_id=_round.set_id,
+        match_id=_round.match_id
     )
 
     try:

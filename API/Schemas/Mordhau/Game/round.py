@@ -3,7 +3,6 @@ from typing import List
 
 from pydantic import Field
 from pydantic import UUID4
-from pydantic import validator
 
 from API.Schemas import BaseInDB
 from API.Schemas import BaseSchema
@@ -42,6 +41,8 @@ class CreateRoundPlayer(RoundPlayer):
 
 
 class BaseRoundPlayerInDB(RoundPlayer, BaseInDB):
+    set_id: UUID4
+    match_id: UUID4
     ...
 
 
@@ -78,6 +79,8 @@ class Round(BaseRound):
 
 
 class BaseRoundInDB(Round, BaseInDB):
+    match_id: UUID4
+    set_id: UUID4
     team1_players: List[RoundPlayerInDB]
     team2_players: List[RoundPlayerInDB]
 
