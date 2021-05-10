@@ -163,8 +163,6 @@ def dynamic_env_load(instance: object, base_match: str, uninstantiated_object) -
                 instance_vars[var] = int(env_var)
             elif str(env_var).casefold() == "none":
                 instance_vars[var] = None
-            elif "[" in str(env_var)[0] and "]" in str(env_var)[-1]:
-                instance_vars[var] = str(env_var).strip("[").strip("]").split(",")
             else:
                 instance_vars[var] = str(env_var)
         try:

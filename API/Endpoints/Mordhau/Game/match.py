@@ -1,8 +1,11 @@
 import logging
+from typing import Optional
+from datetime import datetime
 
 from fastapi import APIRouter
 from fastapi import Depends
 from fastapi import status
+from fastapi import Query
 
 from fastapi.exceptions import HTTPException
 
@@ -54,8 +57,12 @@ class Match(BaseEndpoint):
 
     @staticmethod
     @route.get("/all", tags=tags, response_model=list[MatchInDB])
-    async def get_all_matches():
-        matches = await get_matches()
+    async def get_all_matches(start_time: Optional[datetime] = Query(None, title="ISO 8601 Timestamp", Optional=True),
+                              end_time: Optional[datetime] = Query(None, title="ISO 8601 Timestamp", Optional=True)):
+        if start_time and not end_time or end_time and not start_time:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                detail=f"Both a start and end time MUST be supplied if a date is given!")
+        matches = await get_matches(start_time, end_time)
         return matches
 
     @staticmethod

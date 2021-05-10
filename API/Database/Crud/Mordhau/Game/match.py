@@ -1,3 +1,5 @@
+import datetime
+
 from fastapi import HTTPException
 from fastapi import status
 
@@ -88,8 +90,15 @@ async def get_matches_by_team_id(team_id) -> [SchemaMatchInDB]:
         return await get_match(match_schema=ModelMatch.team2_id, match_str=team_id, fetch_one=False)
 
 
-async def get_matches() -> list[SchemaMatchInDB]:
-    query: ModelMatch.__table__.select = ModelMatch.__table__.select()
+async def get_matches(start_time: datetime.datetime = None, end_time: datetime.datetime = None) -> \
+        list[SchemaMatchInDB]:
+
+    if start_time and end_time:
+        query: ModelMatch.__table__.select = ModelMatch.__table__.select().where(
+            ModelMatch.creation >= start_time
+        ).where(ModelMatch.creation <= end_time)
+    else:
+        query: ModelMatch.__table__.select = ModelMatch.__table__.select()
 
     return await get_match(query=query, fetch_one=False)
 
