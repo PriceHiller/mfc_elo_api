@@ -16,7 +16,7 @@ class BaseTeam(BaseSchema):
 
 class Team(BaseTeam):
     elo: int
-    discord_id: Optional[int]
+    discord_id: Optional[str]
 
     class Config:
         schema_extra = {

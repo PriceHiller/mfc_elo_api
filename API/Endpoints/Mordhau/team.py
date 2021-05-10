@@ -39,7 +39,9 @@ class MordhauTeam(BaseEndpoint):
     @staticmethod
     @route.get("/all", tags=tags, response_model=list[TeamInDB])
     async def team():
-        return await get_teams()
+        teams = await get_teams()
+        print(teams)
+        return teams
 
     @staticmethod
     @route.get("/id", tags=tags, response_model=TeamInDB)
