@@ -218,7 +218,7 @@ All sql variables are preceded by `SQL_`
 
 ## Uvicorn Variables
 
-See [uvicorn settings](https://www.uvicorn.org/settings/) as I sure shit ain't writin' all that bs out.
+See [uvicorn settings](https://www.uvicorn.org/settings/) for uvicorn configuration.
 
 Effectively, take the name of each setting, append `UVICORN_` to the start of it in your environment and that's how you
 pass arguments to uvicorn in this application.
