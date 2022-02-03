@@ -6,8 +6,6 @@
 
 For OS X and Linux the following bash will install all dependencies and run the program.
 
-On Windows? Go die.
-
 - **Configuration**.
 
   First thing you should do is create a `.env` file in the `API` directory.
